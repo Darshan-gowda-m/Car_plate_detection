@@ -1,0 +1,193 @@
+<footer class="footer">
+    <div class="footer-content">
+        <!-- Main Footer -->
+        <div class="footer-main">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" height="40">
+                    <span class="logo-text">PlateDetect</span>
+                </div>
+                <p class="footer-description">
+                    AI-powered vehicle license plate detection system with multi-engine OCR support.
+                </p>
+                <div class="footer-social">
+                    <a href="#" class="social-link">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4 class="footer-title">Product</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('upload_page') }}">Upload</a></li>
+                    <li><a href="{{ url_for('batch_page') }}">Batch Processing</a></li>
+                    <li><a href="{{ url_for('results_page') }}">Results</a></li>
+                    <li><a href="{{ url_for('live_page') }}">Live Camera</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4 class="footer-title">API</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('api_page') }}">Documentation</a></li>
+                    <li><a href="/api/examples">Examples</a></li>
+                    <li><a href="/api/sdks">SDKs</a></li>
+                    <li><a href="/api/playground">Playground</a></li>
+                    <li><a href="/api/keys">API Keys</a></li>
+                    <li><a href="/api/rate-limits">Rate Limits</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4 class="footer-title">Support</h4>
+                <ul class="footer-links">
+                    <li><a href="/help">Help Center</a></li>
+                    <li><a href="/docs">Documentation</a></li>
+                    <li><a href="/tutorials">Tutorials</a></li>
+                    <li><a href="/community">Community</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/status">System Status</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4 class="footer-title">Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/cookies">Cookie Policy</a></li>
+                    <li><a href="/security">Security</a></li>
+                    <li><a href="/compliance">Compliance</a></li>
+                    <li><a href="/licensing">Licensing</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="footer-divider"></div>
+
+        <!-- Bottom Footer -->
+        <div class="footer-bottom">
+            <div class="footer-copyright">
+                &copy; 2024 Plate Detection System. All rights reserved.
+                <span class="version">v1.0.0</span>
+            </div>
+            
+            <div class="footer-actions">
+                <button class="footer-action" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i> Dark Mode
+                </button>
+                <button class="footer-action" onclick="showSystemInfo()">
+                    <i class="fas fa-info-circle"></i> System Info
+                </button>
+                <button class="footer-action" onclick="clearCache()">
+                    <i class="fas fa-broom"></i> Clear Cache
+                </button>
+                <a href="/admin" class="footer-action">
+                    <i class="fas fa-cog"></i> Admin Panel
+                </a>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="system-info" id="system-info" style="display: none;">
+            <div class="system-info-content">
+                <div class="info-header">
+                    <h4><i class="fas fa-info-circle"></i> System Information</h4>
+                    <button class="close-btn" onclick="hideSystemInfo()">&times;</button>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Backend Version:</span>
+                        <span class="info-value" id="backend-version">1.0.0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">API Version:</span>
+                        <span class="info-value">v1</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Uptime:</span>
+                        <span class="info-value" id="uptime">0 days</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Updated:</span>
+                        <span class="info-value" id="last-updated">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    showNotification('Dark mode toggled', 'info');
+}
+
+function showSystemInfo() {
+    fetch('/api/system/health')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('backend-version').textContent = 
+                data.version || '1.0.0';
+            document.getElementById('last-updated').textContent = 
+                new Date(data.timestamp).toLocaleString();
+            document.getElementById('system-info').style.display = 'block';
+        })
+        .catch(console.error);
+}
+
+function hideSystemInfo() {
+    document.getElementById('system-info').style.display = 'none';
+}
+
+function clearCache() {
+    if (confirm('Clear all cached data? This will remove temporary files and cached results.')) {
+        fetch('/api/system/cleanup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clear_cache: true })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showNotification('Cache cleared successfully', 'success');
+        })
+        .catch(error => {
+            showNotification('Failed to clear cache', 'error');
+        });
+    }
+}
+
+// Check for saved dark mode preference
+if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+}
+
+// Load uptime
+function loadUptime() {
+    fetch('/api/system/metrics')
+        .then(response => response.json())
+        .then(data => {
+            // Calculate uptime from system metrics
+            // This is a placeholder - actual implementation would track startup time
+            document.getElementById('uptime').textContent = '24 hours';
+        })
+        .catch(console.error);
+}
+
+document.addEventListener('DOMContentLoaded', loadUptime);
+</script>

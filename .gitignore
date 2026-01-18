@@ -1,0 +1,415 @@
+# ============================================
+# VEHICLE PLATE DETECTION SYSTEM
+# ============================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Outputs
+outputs/
+!outputs/.gitkeep
+
+# Uploads (user data)
+uploads/
+!uploads/.gitkeep
+
+# Temp files
+temp/
+!temp/.gitkeep
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Models (cache)
+models/cache/
+models/__pycache__/
+
+# ============================================
+# AI MODEL FILES (Do not commit these)
+# ============================================
+
+# YOLO Models
+models/yolov8*.pt
+models/yolov11*.pt
+models/*yolo*.pt
+models/*yolo*.pth
+models/*yolo*.weights
+models/*.onnx
+models/*.engine
+
+# Transformer Models
+models/transformer*.pt
+models/detr*.pt
+models/*transformer*.pth
+models/facebook/detr-*
+models/huggingface/*
+
+# EasyOCR Models
+models/easyocr/
+models/craft_mlt_25k.pth
+models/craft_mlt_25k.zip
+models/english_g2.pth
+
+# Tesseract Models
+models/tessdata/
+models/*.traineddata
+
+# Google Vision Models (cached)
+models/google_vision_cache/
+models/gvision_*.pkl
+
+# Custom trained models
+models/trained/
+models/checkpoints/
+models/backup/
+
+# ONNX models
+models/*.onnx
+models/*.ort
+
+# PyTorch/TensorFlow
+*.pt
+*.pth
+*.h5
+*.hdf5
+*.ckpt
+*.safetensors
+*.bin
+*.index
+*.data-00000-of-00001
+
+# ============================================
+# Other files to ignore
+# ============================================
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Test outputs
+test_outputs/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# IDE specific
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+.idea/dataSources.ids
+.idea/dataSources.xml
+.idea/dataSources.local.xml
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+*.tmp
+*.temp
+
+# System files
+.directory
+*.pid
+*.lock
+
+# Project specific generated files
+data/plates_prod.db
+!data/.gitkeep
+config.env
+setup.py
+test.py
+run_minimal.py
+*.cfg
+.pytesseract.cfg
+
+# Google credentials (NEVER COMMIT THESE!)
+credentials/*.json
+*.json
+*.key
+*.p12
+*.pem
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+
+# Documentation
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# node.js
+node_modules/
+npm-debug.log*
+
+# ESLint
+.eslintcache
+
+# Stylelint
+.stylelintcache
+
+# Webpack
+webpack-assets.json
+
+# Python packaging
+*.whl
+*.tar.gz
+
+# Python virtual environment
+pyvenv.cfg
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Temporary model downloads
+models/temp/
+models/__pycache__/
+
+# User uploaded files (never commit these)
+uploads/*.jpg
+uploads/*.png
+uploads/*.jpeg
+uploads/*.mp4
+!uploads/.gitkeep
+
+# Output files (can be regenerated)
+outputs/*.jpg
+outputs/*.png
+outputs/*.mp4
+!outputs/.gitkeep
+
+# Temporary processing files
+temp/*.jpg
+temp/*.png
+temp/*.mp4
+!temp/.gitkeep
+
+# ============================================
+# Model files that WILL be downloaded/created
+# ============================================
+!models/yolov8n.pt  # This is the base model we'll use
+!models/haarcascade_russian_plate_number.xml  # OpenCV cascade
+!models/.gitkeep

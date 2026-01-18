@@ -1,0 +1,177 @@
+<header class="header">
+    <div class="header-content">
+        <!-- Logo -->
+        <div class="logo">
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Plate Detection Logo">
+                <span class="logo-text">PlateDetect</span>
+            </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('upload_page') }}" class="nav-link">
+                        <i class="fas fa-upload"></i>
+                        <span>Upload</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('batch_page') }}" class="nav-link">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Batch</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('results_page') }}" class="nav-link">
+                        <i class="fas fa-database"></i>
+                        <span>Results</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('live_page') }}" class="nav-link">
+                        <i class="fas fa-video"></i>
+                        <span>Live</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('api_page') }}" class="nav-link">
+                        <i class="fas fa-code"></i>
+                        <span>API</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- User Menu -->
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Administrator</span>
+                </div>
+                <i class="fas fa-chevron-down dropdown-icon"></i>
+            </div>
+            
+            <div class="dropdown-menu">
+                <a href="/profile" class="dropdown-item">
+                    <i class="fas fa-user-cog"></i> Profile Settings
+                </a>
+                <a href="/api-keys" class="dropdown-item">
+                    <i class="fas fa-key"></i> API Keys
+                </a>
+                <a href="/notifications" class="dropdown-item">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="/settings" class="dropdown-item">
+                    <i class="fas fa-cog"></i> System Settings
+                </a>
+                <a href="/logs" class="dropdown-item">
+                    <i class="fas fa-file-alt"></i> System Logs
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="/logout" class="dropdown-item logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Navigation -->
+<div class="mobile-nav" id="mobile-nav">
+    <div class="mobile-nav-header">
+        <h3>Navigation</h3>
+        <button class="mobile-nav-close" id="mobile-nav-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <ul class="mobile-nav-list">
+        <li>
+            <a href="{{ url_for('dashboard') }}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('upload_page') }}">
+                <i class="fas fa-upload"></i> Upload
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('batch_page') }}">
+                <i class="fas fa-layer-group"></i> Batch
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('results_page') }}">
+                <i class="fas fa-database"></i> Results
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('live_page') }}">
+                <i class="fas fa-video"></i> Live
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('api_page') }}">
+                <i class="fas fa-code"></i> API
+            </a>
+        </li>
+        <li class="mobile-nav-divider"></li>
+        <li>
+            <a href="/profile">
+                <i class="fas fa-user-cog"></i> Profile
+            </a>
+        </li>
+        <li>
+            <a href="/settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+        </li>
+        <li>
+            <a href="/logout" class="logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </li>
+    </ul>
+</div>
+
+<script>
+// Mobile menu toggle
+document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+    document.getElementById('mobile-nav').classList.add('active');
+});
+
+document.getElementById('mobile-nav-close').addEventListener('click', function() {
+    document.getElementById('mobile-nav').classList.remove('active');
+});
+
+// User menu dropdown
+const userMenu = document.querySelector('.user-menu');
+userMenu.addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.classList.toggle('active');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function() {
+    userMenu.classList.remove('active');
+});
+</script>

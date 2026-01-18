@@ -1,0 +1,217 @@
+<aside class="sidebar">
+    <div class="sidebar-content">
+        <!-- Quick Actions -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                <i class="fas fa-bolt"></i> Quick Actions
+            </h3>
+            <div class="quick-actions">
+                <a href="{{ url_for('upload_page') }}" class="quick-action">
+                    <div class="action-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-title">Upload Image</div>
+                        <div class="action-desc">Process single image</div>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('batch_page') }}" class="quick-action">
+                    <div class="action-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-title">Batch Process</div>
+                        <div class="action-desc">Process multiple files</div>
+                    </div>
+                </a>
+                
+                <button class="quick-action" onclick="showSettings()">
+                    <div class="action-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-title">Settings</div>
+                        <div class="action-desc">Configure system</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                <i class="fas fa-history"></i> Recent Activity
+            </h3>
+            <div class="activity-list" id="sidebar-activity">
+                <div class="activity-item">
+                    <div class="activity-icon processing">
+                        <i class="fas fa-sync fa-spin"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">Loading activity...</div>
+                        <div class="activity-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                <i class="fas fa-heartbeat"></i> System Status
+            </h3>
+            <div class="status-list">
+                <div class="status-item">
+                    <div class="status-indicator healthy"></div>
+                    <span class="status-label">API Server</span>
+                    <span class="status-value">Online</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator healthy"></div>
+                    <span class="status-label">Database</span>
+                    <span class="status-value">Connected</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator healthy"></div>
+                    <span class="status-label">Detection Model</span>
+                    <span class="status-value">Loaded</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator healthy"></div>
+                    <span class="status-label">OCR Engines</span>
+                    <span class="status-value">Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                <i class="fas fa-chart-bar"></i> Today's Stats
+            </h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="today-processed">0</div>
+                    <div class="stat-label">Processed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="today-success">0</div>
+                    <div class="stat-label">Successful</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="today-accuracy">0%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="today-time">0s</div>
+                    <div class="stat-label">Avg Time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                <i class="fas fa-link"></i> Quick Links
+            </h3>
+            <div class="quick-links">
+                <a href="/api/docs" class="quick-link">
+                    <i class="fas fa-book"></i> API Documentation
+                </a>
+                <a href="/tutorials" class="quick-link">
+                    <i class="fas fa-graduation-cap"></i> Tutorials
+                </a>
+                <a href="/support" class="quick-link">
+                    <i class="fas fa-question-circle"></i> Support
+                </a>
+                <a href="/changelog" class="quick-link">
+                    <i class="fas fa-list-alt"></i> Changelog
+                </a>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<script>
+// Load sidebar data
+function loadSidebarData() {
+    // Load today's stats
+    fetch('/api/results/stats?days=1')
+        .then(response => response.json())
+        .then(data => {
+            if (data.overview) {
+                document.getElementById('today-processed').textContent = 
+                    data.overview.recent_results || 0;
+                document.getElementById('today-success').textContent = 
+                    data.overview.recent_results || 0; // In reality, calculate success rate
+                document.getElementById('today-accuracy').textContent = 
+                    (data.overview.avg_confidence * 100).toFixed(1) + '%' || '0%';
+            }
+        })
+        .catch(console.error);
+
+    // Load recent activity
+    fetch('/api/results?per_page=5')
+        .then(response => response.json())
+        .then(data => {
+            const activityList = document.getElementById('sidebar-activity');
+            if (data.results && data.results.length > 0) {
+                activityList.innerHTML = '';
+                data.results.slice(0, 5).forEach(result => {
+                    const activityItem = document.createElement('div');
+                    activityItem.className = 'activity-item';
+                    
+                    const statusClass = result.status === 'completed' ? 'success' : 
+                                      result.status === 'failed' ? 'error' : 'processing';
+                    
+                    activityItem.innerHTML = `
+                        <div class="activity-icon ${statusClass}">
+                            <i class="fas fa-${result.status === 'completed' ? 'check-circle' : 
+                                            result.status === 'failed' ? 'exclamation-circle' : 'sync'}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">
+                                ${result.filename || 'Unknown'}
+                            </div>
+                            <div class="activity-time">
+                                ${formatRelativeTime(result.timestamp)}
+                            </div>
+                        </div>
+                    `;
+                    activityList.appendChild(activityItem);
+                });
+            }
+        })
+        .catch(console.error);
+}
+
+function formatRelativeTime(timestamp) {
+    if (!timestamp) return 'Just now';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    
+    if (diffSec < 60) return 'Just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHour < 24) return `${diffHour}h ago`;
+    
+    return date.toLocaleDateString();
+}
+
+function showSettings() {
+    // Show settings modal
+    alert('Settings modal would appear here');
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', loadSidebarData);
+
+// Refresh every 30 seconds
+setInterval(loadSidebarData, 30000);
+</script>

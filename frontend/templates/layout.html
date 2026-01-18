@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plate Detection Pro{% endblock %}</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    
+    <style>
+    /* ===== CRITICAL CSS - LOAD IMMEDIATELY ===== */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #8b5cf6;
+        --bg-dark: #0f172a;
+        --bg-card: #1e293b;
+        --text-primary: #f8fafc;
+        --radius: 8px;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    /* Minimal layout for immediate display */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(99, 102, 241, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--primary);
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Hidden by default, will be shown by JS */
+    #main-content {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    #main-content.loaded {
+        opacity: 1;
+    }
+    </style>
+    
+    <!-- Non-critical CSS deferred -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Initial loading -->
+    <div class="loading-overlay" id="initial-loading">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem; color: #94a3b8;">Loading Plate Detection System...</p>
+        </div>
+    </div>
+
+    <!-- Main content (hidden initially) -->
+    <div id="main-content" style="display: none;">
+        <!-- Notification Container -->
+        <div id="notification-container"></div>
+
+        <!-- Navigation -->
+        <nav class="navbar" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #475569;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; max-width: 1400px; margin: 0 auto;">
+                <a href="/" style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; color: white; text-decoration: none;">
+                    <i class="fas fa-car-alt" style="color: #6366f1; font-size: 1.75rem;"></i>
+                    <span>PlateDetect Pro</span>
+                </a>
+                
+                <button id="menuToggle" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: none;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <ul id="navbarNav" style="display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0;">
+                    <li>
+                        <a href="/" class="nav-link" style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s; text-decoration: none;">
+                            <i class="fas fa-home" style="font-size: 1.1em;"></i> Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/dashboard" class="nav-link" style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s; text-decoration: none;">
+                            <i class="fas fa-chart-line" style="font-size: 1.1em;"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/upload" class="nav-link" style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s; text-decoration: none;">
+                            <i class="fas fa-upload" style="font-size: 1.1em;"></i> Upload
+                        </a>
+                    </li>
+                  
+                    <li>
+                        <a href="/results" class="nav-link" style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s; text-decoration: none;">
+                            <i class="fas fa-database" style="font-size: 1.1em;"></i> Results
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/live" class="nav-link" style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s; text-decoration: none;">
+                            <i class="fas fa-video" style="font-size: 1.1em;"></i> Live
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="navbar-actions">
+                    <div id="systemStatus" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="status-indicator" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
+                        <span class="status-text" style="font-size: 0.875rem; color: #94a3b8;">System Healthy</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer style="background: #1e293b; border-top: 1px solid #475569; margin-top: 4rem; padding: 2rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+                <p style="color: #94a3b8;">&copy; 2026 Plate Detection System. All rights reserved.</p>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="/api" style="color: #94a3b8; text-decoration: none;">API Documentation</a>
+                    <span style="color: #94a3b8;">|</span>
+                    <span style="color: #94a3b8;">Version 1.0.0</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    // ===== FAST LOADING SCRIPT =====
+    (function() {
+        // Show content immediately with minimal JS
+        const mainContent = document.getElementById('main-content');
+        const initialLoading = document.getElementById('initial-loading');
+        
+        // Show content after 100ms minimum (perceived performance)
+        setTimeout(() => {
+            mainContent.style.display = 'block';
+            initialLoading.style.display = 'none';
+            
+            // Trigger CSS transition
+            requestAnimationFrame(() => {
+                mainContent.classList.add('loaded');
+            });
+        }, 100);
+        
+        // Initialize navigation
+        const menuToggle = document.getElementById('menuToggle');
+        const navbarNav = document.getElementById('navbarNav');
+        
+        if (menuToggle && navbarNav) {
+            // Check if mobile
+            if (window.innerWidth <= 768) {
+                menuToggle.style.display = 'block';
+                navbarNav.style.display = 'none';
+                
+                menuToggle.addEventListener('click', () => {
+                    const isVisible = navbarNav.style.display === 'flex';
+                    navbarNav.style.display = isVisible ? 'none' : 'flex';
+                    menuToggle.innerHTML = isVisible ? 
+                        '<i class="fas fa-bars"></i>' : 
+                        '<i class="fas fa-times"></i>';
+                    
+                    if (!isVisible) {
+                        navbarNav.style.position = 'absolute';
+                        navbarNav.style.top = '70px';
+                        navbarNav.style.left = '0';
+                        navbarNav.style.right = '0';
+                        navbarNav.style.background = '#1e293b';
+                        navbarNav.style.flexDirection = 'column';
+                        navbarNav.style.padding = '1rem';
+                        navbarNav.style.borderTop = '1px solid #475569';
+                    }
+                });
+            }
+            
+            // Set active nav link
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.style.color = '#6366f1';
+                    link.style.background = 'rgba(99, 102, 241, 0.1)';
+                }
+            });
+        }
+        
+        // Simple notification system
+        window.showNotification = function(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            if (!container) return;
+            
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                background: #1e293b;
+                border-left: 4px solid #6366f1;
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            `;
+            
+            if (type === 'success') notification.style.borderLeftColor = '#10b981';
+            if (type === 'error') notification.style.borderLeftColor = '#ef4444';
+            if (type === 'warning') notification.style.borderLeftColor = '#f59e0b';
+            
+            notification.innerHTML = `
+                <div style="font-size: 1.5rem;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                </div>
+                <div>${message}</div>
+                <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.2rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        };
+        
+        // Check system health (non-blocking, runs in background)
+        setTimeout(() => {
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    const statusEl = document.getElementById('systemStatus');
+                    if (!statusEl) return;
+                    
+                    const indicator = statusEl.querySelector('.status-indicator');
+                    const text = statusEl.querySelector('.status-text');
+                    
+                    if (data.status === 'healthy') {
+                        indicator.style.background = '#10b981';
+                        indicator.style.boxShadow = '0 0 10px #10b981';
+                        text.textContent = 'System Healthy';
+                    } else if (data.status === 'degraded') {
+                        indicator.style.background = '#f59e0b';
+                        indicator.style.boxShadow = '0 0 10px #f59e0b';
+                        text.textContent = 'System Degraded';
+                    } else {
+                        indicator.style.background = '#ef4444';
+                        indicator.style.boxShadow = '0 0 10px #ef4444';
+                        text.textContent = 'System Unhealthy';
+                    }
+                })
+                .catch(() => {
+                    const statusEl = document.getElementById('systemStatus');
+                    if (statusEl) {
+                        const indicator = statusEl.querySelector('.status-indicator');
+                        const text = statusEl.querySelector('.status-text');
+                        indicator.style.background = '#ef4444';
+                        indicator.style.boxShadow = '0 0 10px #ef4444';
+                        text.textContent = 'Connection Error';
+                    }
+                });
+        }, 1000); // Delay health check to not block initial render
+        
+        // Load non-critical CSS (if deferred loading didn't work)
+        if (!document.querySelector('link[href*="fonts.googleapis.com"]').media === 'all') {
+            const fontLink = document.createElement('link');
+            fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap';
+            fontLink.rel = 'stylesheet';
+            document.head.appendChild(fontLink);
+        }
+        
+        // Add animation for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            /* Responsive styles */
+            @media (max-width: 768px) {
+                #menuToggle { display: block !important; }
+                .navbar > div { padding: 1rem !important; }
+                footer > div { flex-direction: column; gap: 1rem; text-align: center; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+    })();
+    
+    // Simple API client for demo
+    window.apiClient = {
+        async uploadImage(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('/api/upload/single', {
+                    method: 'POST',
+                    body: formData
+                });
+                return await response.json();
+            } catch (error) {
+                showNotification('Upload failed: ' + error.message, 'error');
+                throw error;
+            }
+        },
+        
+        async processImage(file, options = {}) {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('options', JSON.stringify(options || {
+                detection: { use_yolo: true },
+                ocr: { engines: ['easyocr'] }
+            }));
+            
+            try {
+                const response = await fetch('/api/process/single', {
+                    method: 'POST',
+                    body: formData
+                });
+                return await response.json();
+            } catch (error) {
+                showNotification('Processing failed: ' + error.message, 'error');
+                throw error;
+            }
+        }
+    };
+    
+    // Show loading overlay utility
+    window.showLoading = function() {
+        const overlay = document.createElement('div');
+        overlay.id = 'loading-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        `;
+        
+        overlay.innerHTML = `
+            <div style="text-align: center;">
+                <div class="spinner" style="width: 50px; height: 50px; border: 3px solid rgba(99,102,241,0.3); border-radius: 50%; border-top-color: #6366f1; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                <p style="color: #94a3b8;">Processing...</p>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        return overlay;
+    };
+    
+    window.hideLoading = function() {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.remove();
+    };
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

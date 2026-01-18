@@ -1,0 +1,850 @@
+{% extends "layout.html" %}
+
+{% block title %}Home - Plate Detection Pro{% endblock %}
+
+{% block content %}
+<style>
+/* Fast loading CSS - minimal, inline */
+.hero-section {
+    padding: 4rem 0;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+}
+
+.hero-title {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: #94a3b8;
+    max-width: 800px;
+    margin: 0 auto 3rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 3rem 0;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+
+.btn-secondary {
+    background: #334155;
+    color: white;
+    border: 1px solid #475569;
+}
+
+.btn-secondary:hover {
+    background: #1e293b;
+    border-color: #6366f1;
+}
+
+.features-section {
+    padding: 4rem 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(30, 41, 59, 0.3) 100%);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.feature-card {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s;
+}
+
+.feature-card:hover {
+    border-color: #6366f1;
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.feature-icon i {
+    color: white;
+    font-size: 1.5rem;
+}
+
+.demo-section {
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.demo-card {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.demo-preview {
+    width: 100%;
+    height: 250px;
+    background: #334155;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.demo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.demo-preview canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.processing-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    color: #94a3b8;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #334155;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.input-file {
+    display: none;
+}
+
+.result-section {
+    margin-top: 1.5rem;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+    margin-bottom: 1rem;
+}
+
+.plate-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.plate-meta {
+    display: flex;
+    gap: 1rem;
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.plate-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.plate-visualization {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 6px;
+}
+
+.visualization-title {
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.visualization-canvas {
+    width: 100%;
+    height: 150px;
+    background: #1e293b;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.visualization-canvas img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.plate-details {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 6px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.detail-value {
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .hero-title { font-size: 2rem; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    .hero-actions .btn { width: 100%; max-width: 300px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="hero-section">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+        <h1 class="hero-title">🚗 AI Plate Detection</h1>
+        <p class="hero-subtitle">
+            Real-time license plate recognition with YOLOv11 and multiple OCR engines.
+            Fast, accurate, and production-ready.
+        </p>
+        
+        <div class="hero-actions">
+            <a href="/upload" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Upload Image
+            </a>
+            <a href="/live" class="btn btn-secondary">
+                <i class="fas fa-video"></i> Live Demo
+            </a>
+            <a href="/api" class="btn btn-secondary">
+                <i class="fas fa-code"></i> API Docs
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">Why Choose Our System?</h2>
+        <p style="text-align: center; color: #94a3b8; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Built for performance and accuracy with modern AI technology
+        </p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Fast Processing</h3>
+                <p style="color: #94a3b8;">Process images in under 1 second with optimized YOLOv11 models and GPU acceleration.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Multiple OCR Engines</h3>
+                <p style="color: #94a3b8;">EasyOCR, Tesseract, and Google Vision with intelligent fallback for maximum accuracy.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">High Accuracy</h3>
+                <p style="color: #94a3b8;">Advanced preprocessing and validation algorithms ensure 99%+ accuracy rates.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Production Ready</h3>
+                <p style="color: #94a3b8;"> REST API, real-time monitoring, and comprehensive analytics.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="demo-section">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">Try It Now</h2>
+        <p style="text-align: center; color: #94a3b8; margin-bottom: 3rem;">
+            Upload a vehicle image and see real-time plate detection
+        </p>
+        
+        <div class="demo-card">
+            <div class="demo-preview" id="demoPreview">
+                <i class="fas fa-car fa-3x" style="color: #64748b;"></i>
+                <canvas id="detectionCanvas" style="display: none;"></canvas>
+            </div>
+            
+            <div id="processingIndicator" class="processing-indicator" style="display: none;">
+                <div class="spinner"></div>
+                <span>Processing image...</span>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <input type="file" id="demoUpload" accept="image/*" class="input-file">
+                <button onclick="document.getElementById('demoUpload').click()" class="btn btn-primary">
+                    <i class="fas fa-upload"></i> Choose Image
+                </button>
+                <button onclick="processDemoImage()" class="btn btn-secondary" id="processBtn" disabled>
+                    <i class="fas fa-play"></i> Detect Plate
+                </button>
+            </div>
+            
+            <div id="demoResult" class="result-section" style="display: none;">
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Plate Detected!</h4>
+                    </div>
+                    
+                    <div id="plateResults"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="padding: 4rem 0; text-align: center; background: linear-gradient(180deg, rgba(30, 41, 59, 0.3) 0%, transparent 100%);">
+    <div style="max-width: 800px; margin: 0 auto; padding: 0 2rem;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Ready to Get Started?</h2>
+        <p style="color: #94a3b8; margin-bottom: 2rem; font-size: 1.125rem;">
+            Start detecting license plates in minutes. No setup required.
+        </p>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/upload" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                <i class="fas fa-rocket"></i> Start Processing
+            </a>
+            <a href="/dashboard" class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                <i class="fas fa-chart-bar"></i> View Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// API Client
+class APIClient {
+    constructor(baseUrl = '') {
+        this.baseUrl = baseUrl;
+    }
+
+    async processImage(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        // Add processing options
+        formData.append('options', JSON.stringify({
+            confidence_threshold: 0.3,
+            use_yolo: true,
+            use_transformer: false,
+            multi_scale: false,
+            ocr: {
+                easyocr: true,
+                tesseract: true,
+                google_vision: true,
+                deep_ocr: true
+            },
+            save_output: true
+        }));
+
+        const response = await fetch(`${this.baseUrl}/api/process/single`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Processing failed');
+        }
+
+        return await response.json();
+    }
+
+    async uploadImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${this.baseUrl}/api/upload/single`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
+
+        return await response.json();
+    }
+}
+
+// Initialize API client
+const apiClient = new APIClient();
+
+// Global variables
+let demoImage = null;
+let originalImage = null;
+let detectionCanvas = null;
+let canvasContext = null;
+
+// Initialize canvas
+function initCanvas() {
+    detectionCanvas = document.getElementById('detectionCanvas');
+    canvasContext = detectionCanvas.getContext('2d');
+}
+
+// Handle file selection
+document.getElementById('demoUpload').addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+        demoImage = e.target.files[0];
+        const preview = document.getElementById('demoPreview');
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Store original image for drawing
+                originalImage = img;
+                
+                // Set canvas dimensions
+                detectionCanvas.width = img.width;
+                detectionCanvas.height = img.height;
+                
+                // Draw image on canvas
+                canvasContext.drawImage(img, 0, 0);
+                
+                // Update preview
+                preview.querySelector('i').style.display = 'none';
+                preview.innerHTML = '';
+                preview.appendChild(img.cloneNode());
+                preview.appendChild(detectionCanvas);
+                
+                // Show canvas
+                detectionCanvas.style.display = 'block';
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(demoImage);
+        
+        // Enable process button
+        document.getElementById('processBtn').disabled = false;
+        
+        // Hide previous results
+        document.getElementById('demoResult').style.display = 'none';
+        
+        showNotification('Image loaded successfully!', 'success');
+    }
+});
+
+// Draw detection boxes on canvas
+function drawDetections(detections, plateResults) {
+    if (!canvasContext || !originalImage) return;
+    
+    // Clear canvas
+    canvasContext.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height);
+    
+    // Draw original image
+    canvasContext.drawImage(originalImage, 0, 0);
+    
+    // Define colors for different confidence levels
+    const getColor = (confidence) => {
+        if (confidence >= 0.8) return '#10b981'; // Green - high confidence
+        if (confidence >= 0.6) return '#f59e0b'; // Yellow - medium confidence
+        return '#ef4444'; // Red - low confidence
+    };
+    
+    // Draw each detection
+    detections.forEach((detection, index) => {
+        const [x1, y1, x2, y2] = detection.bbox;
+        const confidence = detection.confidence || 0;
+        const color = getColor(confidence);
+        
+        // Draw bounding box
+        canvasContext.strokeStyle = color;
+        canvasContext.lineWidth = 3;
+        canvasContext.strokeRect(x1, y1, x2 - x1, y2 - y1);
+        
+        // Draw confidence background
+        const label = `Plate ${index + 1}: ${(confidence * 100).toFixed(1)}%`;
+        canvasContext.fillStyle = color;
+        canvasContext.font = 'bold 14px Arial';
+        const textWidth = canvasContext.measureText(label).width;
+        
+        canvasContext.fillRect(x1, y1 - 25, textWidth + 10, 25);
+        
+        // Draw confidence text
+        canvasContext.fillStyle = 'white';
+        canvasContext.fillText(label, x1 + 5, y1 - 7);
+        
+        // Draw plate text if available
+        if (plateResults && plateResults[index]) {
+            const plateText = plateResults[index].text || '';
+            if (plateText) {
+                canvasContext.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                canvasContext.font = 'bold 16px Arial';
+                const plateTextWidth = canvasContext.measureText(plateText).width;
+                
+                // Draw text background
+                canvasContext.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                canvasContext.fillRect(x1, y2 + 5, plateTextWidth + 10, 25);
+                
+                // Draw text
+                canvasContext.fillStyle = 'white';
+                canvasContext.fillText(plateText, x1 + 5, y2 + 22);
+            }
+        }
+    });
+}
+
+// Process demo image
+async function processDemoImage() {
+    if (!demoImage) return;
+    
+    // Show loading
+    document.getElementById('processingIndicator').style.display = 'flex';
+    document.getElementById('processBtn').disabled = true;
+    
+    try {
+        // First upload the image
+        showNotification('Uploading image...', 'info');
+        const uploadResult = await apiClient.uploadImage(demoImage);
+        
+        if (!uploadResult.success) {
+            throw new Error(uploadResult.error || 'Upload failed');
+        }
+        
+        showNotification('Image uploaded, processing...', 'info');
+        
+        // Then process it
+        const result = await apiClient.processImage(demoImage);
+        
+        // Hide loading
+        document.getElementById('processingIndicator').style.display = 'none';
+        document.getElementById('processBtn').disabled = false;
+        
+        if (result.success) {
+            // Display results
+            displayResults(result);
+            
+            // Draw detections on canvas
+            if (result.plates && result.plates.length > 0) {
+                const detections = result.plates.map(p => p.detection);
+                const plateResults = result.plates.map(p => p.best_ocr || {});
+                drawDetections(detections, plateResults);
+            }
+            
+            showNotification(`Successfully detected ${result.plates?.length || 0} plates`, 'success');
+        } else {
+            showNotification(result.error || 'Processing failed', 'error');
+        }
+    } catch (error) {
+        // Hide loading
+        document.getElementById('processingIndicator').style.display = 'none';
+        document.getElementById('processBtn').disabled = false;
+        
+        console.error('Processing error:', error);
+        showNotification(`Failed: ${error.message}`, 'error');
+    }
+}
+
+// Display results
+function displayResults(result) {
+    const resultsContainer = document.getElementById('plateResults');
+    resultsContainer.innerHTML = '';
+    
+    if (!result.plates || result.plates.length === 0) {
+        resultsContainer.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #94a3b8;">
+                <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom: 1rem;"></i>
+                <p>No plates detected in the image.</p>
+                <p style="font-size: 0.875rem;">Try uploading a clearer image with better lighting.</p>
+            </div>
+        `;
+        document.getElementById('demoResult').style.display = 'block';
+        return;
+    }
+    
+    // Display each detected plate
+    result.plates.forEach((plate, index) => {
+        const plateCard = document.createElement('div');
+        plateCard.className = 'plate-result';
+        plateCard.style.marginBottom = '1rem';
+        
+        const bestOcr = plate.best_ocr || {};
+        const detection = plate.detection || {};
+        const plateInfo = plate.plate_info || {};
+        
+        plateCard.innerHTML = `
+            <div class="plate-text">${bestOcr.text || 'Unknown'}</div>
+            <div class="plate-meta">
+                <span><i class="fas fa-shield-alt"></i> Confidence: ${(bestOcr.confidence * 100).toFixed(1)}%</span>
+                <span><i class="fas fa-clock"></i> OCR Time: ${plate.processing_time?.ocr?.toFixed(2) || '0.00'}s</span>
+                <span><i class="fas fa-cube"></i> Detector: ${detection.detector || 'Unknown'}</span>
+            </div>
+            
+            <div class="plate-details">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Plate Type</span>
+                        <span class="detail-value">${detection.type || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Vehicle Type</span>
+                        <span class="detail-value">${plateInfo.vehicle_type || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Color</span>
+                        <span class="detail-value">${plateInfo.color_type || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Quality Score</span>
+                        <span class="detail-value">${(plateInfo.quality_score * 100 || 0).toFixed(1)}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="plate-visualization">
+                <div class="visualization-title">OCR Engines Used:</div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    ${Object.keys(plate.ocr_results || {}).map(engine => `
+                        <span style="background: #334155; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
+                            ${engine}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        resultsContainer.appendChild(plateCard);
+    });
+    
+    // Show processing summary
+    const summaryCard = document.createElement('div');
+    summaryCard.style.marginTop = '1.5rem';
+    summaryCard.style.padding = '1rem';
+    summaryCard.style.background = 'rgba(30, 41, 59, 0.5)';
+    summaryCard.style.borderRadius = '6px';
+    
+    summaryCard.innerHTML = `
+        <div style="color: #94a3b8; margin-bottom: 0.5rem; font-size: 0.875rem;">
+            <i class="fas fa-info-circle"></i> Processing Summary
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Total Time</span>
+                <span class="detail-value">${result.processing_summary?.total_time?.toFixed(2) || '0.00'}s</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Detection Time</span>
+                <span class="detail-value">${result.processing_summary?.detection_time?.toFixed(2) || '0.00'}s</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">OCR Time</span>
+                <span class="detail-value">${result.processing_summary?.ocr_time?.toFixed(2) || '0.00'}s</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Quality Score</span>
+                <span class="detail-value">${(result.quality_score || 0).toFixed(1)}%</span>
+            </div>
+        </div>
+    `;
+    
+    resultsContainer.appendChild(summaryCard);
+    
+    // Show results section
+    document.getElementById('demoResult').style.display = 'block';
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        z-index: 1000;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle';
+    notification.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+`;
+document.head.appendChild(style);
+
+// Add interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize canvas
+    initCanvas();
+    
+    // Animate feature cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe feature cards
+    document.querySelectorAll('.feature-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(card);
+    });
+    
+    // Health check
+    checkSystemHealth();
+});
+
+// Check system health
+async function checkSystemHealth() {
+    try {
+        const response = await fetch('/api/health');
+        if (response.ok) {
+            const data = await response.json();
+            console.log('System health:', data);
+            
+            if (data.status === 'healthy') {
+                // System is ready
+                console.log('✅ Plate Detection System is ready');
+            } else {
+                console.warn('⚠️ System health check:', data);
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not check system health:', error);
+    }
+}
+</script>
+{% endblock %}

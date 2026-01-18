@@ -1,0 +1,1990 @@
+{% extends "layout.html" %}
+
+{% block title %}Live Camera - Plate Detection{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== LIVE CAMERA STYLES ===== */
+.live-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.live-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+    border-radius: 12px;
+    border: 1px solid #475569;
+}
+
+.live-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.live-subtitle {
+    color: #94a3b8;
+    font-size: 1.125rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Camera Preview Section */
+.camera-section {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.camera-preview {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    min-height: 400px;
+    background: #0f172a;
+    overflow: hidden;
+}
+
+#video-stream {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scaleX(-1); /* Mirror for front camera */
+}
+
+#canvas-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.camera-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    background: rgba(15, 23, 42, 0.9);
+    z-index: 1;
+}
+
+.camera-placeholder i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.camera-placeholder p {
+    margin: 0.25rem 0;
+    text-align: center;
+}
+
+/* Camera Controls */
+.camera-controls {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(30, 41, 59, 0.8);
+    border-top: 1px solid #475569;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.camera-controls .btn {
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Camera Options */
+.camera-options {
+    padding: 1.5rem;
+    background: rgba(51, 65, 85, 0.3);
+    border-top: 1px solid #475569;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #6366f1;
+    cursor: pointer;
+}
+
+.option label {
+    color: #f8fafc;
+    font-weight: 500;
+    cursor: pointer;
+    flex: 1;
+}
+
+/* Statistics Display */
+.stats-section {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card {
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid #475569;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    border-color: #6366f1;
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: #6366f1;
+    margin-bottom: 1rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #94a3b8;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Results Panel */
+.results-panel {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: rgba(30, 41, 59, 0.8);
+    border-bottom: 1px solid #475569;
+}
+
+.results-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: #f8fafc;
+}
+
+.results-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.results-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(51, 65, 85, 0.3);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    border: 1px solid #475569;
+    transition: all 0.3s;
+}
+
+.result-item:hover {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.result-item:last-child {
+    margin-bottom: 0;
+}
+
+.result-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #10b981;
+    flex-shrink: 0;
+}
+
+.result-status.success { background: #10b981; }
+.result-status.warning { background: #f59e0b; }
+.result-status.error { background: #ef4444; }
+
+.result-thumbnail {
+    width: 80px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #334155;
+}
+
+.result-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.result-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.result-plate {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 0.25rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.result-meta {
+    display: flex;
+    gap: 1rem;
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.result-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.empty-results {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: #64748b;
+}
+
+.empty-results i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.empty-results p {
+    margin: 0.5rem 0;
+}
+
+/* Processing Log */
+.log-section {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: rgba(30, 41, 59, 0.8);
+    border-bottom: 1px solid #475569;
+}
+
+.log-header h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: #f8fafc;
+}
+
+.log-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.log-container {
+    height: 200px;
+    overflow-y: auto;
+    background: #0f172a;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+}
+
+.log-entry {
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+    color: #94a3b8;
+    font-family: inherit;
+    line-height: 1.4;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-entry.info { color: #06b6d4; }
+.log-entry.success { color: #10b981; }
+.log-entry.warning { color: #f59e0b; }
+.log-entry.error { color: #ef4444; }
+
+.log-time {
+    color: #64748b;
+    margin-right: 0.75rem;
+}
+
+/* Detection Box Styles */
+.detection-box {
+    position: absolute;
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.detection-label {
+    position: absolute;
+    top: -28px;
+    left: 0;
+    background: #00ff00;
+    color: #000;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #475569;
+    background: rgba(30, 41, 59, 0.8);
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: #f8fafc;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    border-radius: 4px;
+}
+
+.modal-close:hover {
+    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: calc(90vh - 80px);
+    overflow-y: auto;
+}
+
+/* Capture Modal Specific */
+.capture-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.capture-image {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #475569;
+}
+
+.capture-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.capture-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding-top: 1rem;
+    border-top: 1px solid #475569;
+}
+
+/* Detection Details Modal */
+.detection-details {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.detail-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.detail-label {
+    color: #94a3b8;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    color: #f8fafc;
+    font-weight: 500;
+}
+
+.detail-value.plate-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    color: #6366f1;
+}
+
+.detail-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.detail-image {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #475569;
+}
+
+.detail-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .live-container {
+        padding: 0.5rem;
+    }
+    
+    .live-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .live-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .camera-preview {
+        height: 50vh;
+        min-height: 300px;
+    }
+    
+    .camera-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .camera-controls .btn {
+        width: 100%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .result-item {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .result-thumbnail {
+        width: 100%;
+        height: 120px;
+    }
+    
+    .result-meta {
+        justify-content: center;
+    }
+    
+    .capture-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .live-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+    }
+    
+    .result-plate {
+        font-size: 1.125rem;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.result-item {
+    animation: slideInUp 0.3s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="live-container">
+    <!-- Header -->
+    <div class="live-header">
+        <h1><i class="fas fa-video"></i> Live Camera Processing</h1>
+        <p class="live-subtitle">Real-time license plate detection from camera feed with instant OCR results</p>
+    </div>
+
+    <!-- Camera Section -->
+    <div class="camera-section">
+        <div class="camera-preview">
+            <video id="video-stream" autoplay playsinline style="display: none;"></video>
+            <canvas id="canvas-overlay"></canvas>
+            
+            <div class="camera-placeholder" id="camera-placeholder">
+                <i class="fas fa-video"></i>
+                <p style="font-size: 1.125rem; font-weight: 500; color: #f8fafc;">Camera Preview</p>
+                <p>Click "Start Camera" to begin real-time detection</p>
+                <p style="font-size: 0.875rem; opacity: 0.7;">Make sure camera access is allowed</p>
+            </div>
+        </div>
+
+        <!-- Camera Controls -->
+        <div class="camera-controls">
+            <button class="btn btn-primary" id="start-btn" onclick="startCamera()">
+                <i class="fas fa-play"></i> Start Camera
+            </button>
+            <button class="btn btn-secondary" id="capture-btn" onclick="captureFrame()" disabled>
+                <i class="fas fa-camera"></i> Capture Frame
+            </button>
+            <button class="btn btn-warning" id="process-btn" onclick="processFrame()" disabled>
+                <i class="fas fa-cogs"></i> Process Frame
+            </button>
+            <button class="btn btn-danger" id="stop-btn" onclick="stopCamera()" disabled>
+                <i class="fas fa-stop"></i> Stop Camera
+            </button>
+            <button class="btn btn-info" id="toggle-camera-btn" onclick="toggleCamera()" disabled>
+                <i class="fas fa-sync-alt"></i> Switch Camera
+            </button>
+        </div>
+
+        <!-- Camera Options -->
+        <div class="camera-options">
+            <div class="options-grid">
+                <div class="option">
+                    <input type="checkbox" id="auto-process" checked>
+                    <label for="auto-process">Auto-process (2s interval)</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="show-detections" checked>
+                    <label for="show-detections">Show detection boxes</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="show-ocr-text" checked>
+                    <label for="show-ocr-text">Show OCR text overlay</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="save-results" checked>
+                    <label for="save-results">Auto-save successful results</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="mirror-camera" checked>
+                    <label for="mirror-camera">Mirror front camera</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="stats-section">
+        <h3><i class="fas fa-chart-line"></i> Live Statistics</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="stat-value" id="stat-fps">0</div>
+                <div class="stat-label">Frames Per Second</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div class="stat-value" id="stat-frames">0</div>
+                <div class="stat-label">Frames Processed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div class="stat-value" id="stat-detections">0</div>
+                <div class="stat-label">Plates Detected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="stat-value" id="stat-confidence">0%</div>
+                <div class="stat-label">Avg Confidence</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value" id="stat-processing">0ms</div>
+                <div class="stat-label">Processing Time</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="results-panel">
+        <div class="results-header">
+            <h3><i class="fas fa-history"></i> Recent Detections</h3>
+            <div class="results-actions">
+                <button class="btn btn-sm btn-secondary" onclick="clearResults()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="exportResults()">
+                    <i class="fas fa-download"></i> Export JSON
+                </button>
+            </div>
+        </div>
+        
+        <div class="results-list" id="results-list">
+            <div class="empty-results" id="empty-results">
+                <i class="fas fa-search"></i>
+                <p>No plates detected yet</p>
+                <p>Start camera and processing to see live results</p>
+            </div>
+            <!-- Results will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Processing Log -->
+    <div class="log-section">
+        <div class="log-header">
+            <h4><i class="fas fa-terminal"></i> Processing Log</h4>
+            <div class="log-controls">
+                <button class="btn btn-sm btn-secondary" onclick="clearLog()">
+                    <i class="fas fa-eraser"></i> Clear Log
+                </button>
+            </div>
+        </div>
+        <div class="log-container" id="log-container">
+            <div class="log-entry info">
+                <span class="log-time">[00:00:00]</span> System initialized. Ready to start camera.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Capture Modal -->
+<div class="modal" id="capture-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-image"></i> Captured Frame</h3>
+            <button class="modal-close" onclick="closeModal('capture-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="capture-content">
+                <div class="capture-image">
+                    <img id="captured-image" src="" alt="Captured frame">
+                </div>
+                <div class="capture-actions">
+                    <button class="btn btn-primary" onclick="processCaptured()">
+                        <i class="fas fa-cogs"></i> Process This Frame
+                    </button>
+                    <button class="btn btn-secondary" onclick="saveCapture()">
+                        <i class="fas fa-download"></i> Download Image
+                    </button>
+                    <button class="btn btn-outline" onclick="closeModal('capture-modal')">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Result Details Modal -->
+<div class="modal" id="details-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> Detection Details</h3>
+            <button class="modal-close" onclick="closeModal('details-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="detection-details" id="detection-details">
+                <!-- Details will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settings-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-cog"></i> Processing Settings</h3>
+            <button class="modal-close" onclick="closeModal('settings-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-content" id="settings-content">
+                <!-- Settings will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ===== LIVE CAMERA FUNCTIONALITY =====
+let videoStream = null;
+let canvasOverlay = null;
+let overlayCtx = null;
+let isCameraActive = false;
+let isProcessing = false;
+let autoProcessInterval = null;
+let fpsInterval = null;
+let currentCamera = 'environment'; // 'environment' (back) or 'user' (front)
+let availableCameras = [];
+let currentCameraIndex = 0;
+let results = [];
+let detectionHistory = [];
+
+// Statistics
+let stats = {
+    fps: 0,
+    framesProcessed: 0,
+    platesDetected: 0,
+    totalConfidence: 0,
+    totalProcessingTime: 0,
+    startTime: Date.now(),
+    frameCount: 0,
+    lastFpsUpdate: Date.now()
+};
+
+// Processing settings
+let processingSettings = {
+    autoProcessInterval: 2000, // 2 seconds
+    confidenceThreshold: 0.25,
+    showDetections: true,
+    showOcrText: true,
+    saveResults: true,
+    mirrorFrontCamera: true,
+    detectionMethod: 'yolo',
+    ocrEngine: 'easyocr',
+    maxResults: 50
+};
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCamera();
+    initializeEventListeners();
+    checkCameraPermissions();
+});
+
+function initializeCamera() {
+    canvasOverlay = document.getElementById('canvas-overlay');
+    overlayCtx = canvasOverlay.getContext('2d');
+    
+    // Start FPS counter
+    startFpsCounter();
+}
+
+function initializeEventListeners() {
+    // Set up event listeners for options
+    document.getElementById('auto-process').addEventListener('change', toggleAutoProcess);
+    document.getElementById('mirror-camera').addEventListener('change', toggleMirror);
+    document.getElementById('show-detections').addEventListener('change', toggleDetections);
+    document.getElementById('show-ocr-text').addEventListener('change', updateSettings);
+    document.getElementById('save-results').addEventListener('change', updateSettings);
+    
+    // Load saved settings
+    loadSettings();
+}
+
+async function checkCameraPermissions() {
+    try {
+        const permissions = await navigator.permissions.query({ name: 'camera' });
+        if (permissions.state === 'granted') {
+            addLog('Camera permission already granted', 'success');
+        } else if (permissions.state === 'prompt') {
+            addLog('Camera permission will be requested', 'info');
+        } else {
+            addLog('Camera permission denied. Please enable in browser settings.', 'warning');
+        }
+    } catch (error) {
+        console.log('Camera permission check not supported:', error);
+    }
+}
+
+async function getAvailableCameras() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        availableCameras = videoDevices;
+        
+        if (availableCameras.length > 0) {
+            addLog(`Found ${availableCameras.length} camera(s)`, 'success');
+        } else {
+            addLog('No cameras found', 'warning');
+        }
+        
+        return availableCameras;
+    } catch (error) {
+        console.error('Error getting cameras:', error);
+        addLog('Failed to get camera list', 'error');
+        return [];
+    }
+}
+
+// Camera Management
+async function startCamera() {
+    try {
+        addLog('Starting camera...', 'info');
+        
+        // Get available cameras first
+        await getAvailableCameras();
+        
+        const constraints = {
+            video: {
+                deviceId: availableCameras[currentCameraIndex]?.deviceId ? { exact: availableCameras[currentCameraIndex].deviceId } : undefined,
+                facingMode: availableCameras.length === 0 ? currentCamera : undefined,
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                frameRate: { ideal: 30 }
+            }
+        };
+        
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('video-stream');
+        
+        video.srcObject = videoStream;
+        video.style.display = 'block';
+        
+        // Wait for video to load
+        video.onloadedmetadata = function() {
+            // Set canvas size to match video
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            
+            canvasOverlay.width = videoWidth;
+            canvasOverlay.height = videoHeight;
+            canvasOverlay.style.width = videoWidth + 'px';
+            canvasOverlay.style.height = videoHeight + 'px';
+            
+            // Apply mirror if front camera
+            applyMirrorEffect();
+            
+            // Hide placeholder
+            document.getElementById('camera-placeholder').style.display = 'none';
+            
+            // Update UI
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('capture-btn').disabled = false;
+            document.getElementById('process-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = false;
+            document.getElementById('toggle-camera-btn').disabled = false;
+            
+            isCameraActive = true;
+            
+            // Start auto-processing if enabled
+            if (document.getElementById('auto-process').checked) {
+                startAutoProcessing();
+            }
+            
+            addLog(`Camera started: ${videoWidth}x${videoHeight} @ 30fps`, 'success');
+            showNotification('Camera started successfully', 'success');
+        };
+        
+    } catch (error) {
+        console.error('Camera error:', error);
+        addLog(`Failed to start camera: ${error.message}`, 'error');
+        showNotification(`Camera error: ${error.message}`, 'error');
+    }
+}
+
+function stopCamera() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+    
+    const video = document.getElementById('video-stream');
+    video.style.display = 'none';
+    video.srcObject = null;
+    
+    document.getElementById('camera-placeholder').style.display = 'flex';
+    
+    // Clear canvas
+    overlayCtx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+    
+    // Update UI
+    document.getElementById('start-btn').disabled = false;
+    document.getElementById('capture-btn').disabled = true;
+    document.getElementById('process-btn').disabled = true;
+    document.getElementById('stop-btn').disabled = true;
+    document.getElementById('toggle-camera-btn').disabled = true;
+    
+    isCameraActive = false;
+    
+    // Stop auto-processing
+    stopAutoProcessing();
+    
+    addLog('Camera stopped', 'info');
+    showNotification('Camera stopped', 'info');
+}
+
+async function toggleCamera() {
+    if (availableCameras.length <= 1) {
+        // Toggle between front/back if no device list
+        currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+        stopCamera();
+        setTimeout(() => startCamera(), 100);
+    } else {
+        // Cycle through available cameras
+        currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+        stopCamera();
+        setTimeout(() => startCamera(), 100);
+    }
+}
+
+function applyMirrorEffect() {
+    const video = document.getElementById('video-stream');
+    const mirrorEnabled = document.getElementById('mirror-camera').checked;
+    const isFrontCamera = currentCamera === 'user' || 
+                         (availableCameras[currentCameraIndex]?.label?.toLowerCase().includes('front'));
+    
+    if (isFrontCamera && mirrorEnabled) {
+        video.style.transform = 'scaleX(-1)';
+    } else {
+        video.style.transform = 'scaleX(1)';
+    }
+}
+
+function toggleMirror() {
+    if (isCameraActive) {
+        applyMirrorEffect();
+        saveSettings();
+    }
+}
+
+function toggleDetections() {
+    if (!document.getElementById('show-detections').checked) {
+        overlayCtx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+    }
+    saveSettings();
+}
+
+function toggleAutoProcess() {
+    const autoProcess = document.getElementById('auto-process').checked;
+    
+    if (autoProcess && isCameraActive) {
+        startAutoProcessing();
+    } else {
+        stopAutoProcessing();
+    }
+    saveSettings();
+}
+
+function updateSettings() {
+    saveSettings();
+}
+
+// Settings management
+function loadSettings() {
+    const savedSettings = localStorage.getItem('liveCameraSettings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            processingSettings = { ...processingSettings, ...settings };
+            
+            // Update checkboxes
+            document.getElementById('auto-process').checked = processingSettings.autoProcessInterval > 0;
+            document.getElementById('show-detections').checked = processingSettings.showDetections;
+            document.getElementById('show-ocr-text').checked = processingSettings.showOcrText;
+            document.getElementById('save-results').checked = processingSettings.saveResults;
+            document.getElementById('mirror-camera').checked = processingSettings.mirrorFrontCamera;
+        } catch (error) {
+            console.error('Failed to load settings:', error);
+        }
+    }
+}
+
+function saveSettings() {
+    processingSettings.showDetections = document.getElementById('show-detections').checked;
+    processingSettings.showOcrText = document.getElementById('show-ocr-text').checked;
+    processingSettings.saveResults = document.getElementById('save-results').checked;
+    processingSettings.mirrorFrontCamera = document.getElementById('mirror-camera').checked;
+    
+    localStorage.setItem('liveCameraSettings', JSON.stringify(processingSettings));
+}
+
+// Frame Capture and Processing
+function captureFrame() {
+    if (!isCameraActive) return;
+    
+    const video = document.getElementById('video-stream');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Apply mirror if needed
+    const isFrontCamera = currentCamera === 'user' || 
+                         (availableCameras[currentCameraIndex]?.label?.toLowerCase().includes('front'));
+    if (isFrontCamera && processingSettings.mirrorFrontCamera) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+    }
+    
+    ctx.drawImage(video, 0, 0);
+    
+    const imageData = canvas.toDataURL('image/jpeg', 0.9);
+    document.getElementById('captured-image').src = imageData;
+    openModal('capture-modal');
+    
+    addLog('Frame captured', 'info');
+}
+
+function processCaptured() {
+    const img = document.getElementById('captured-image');
+    processSingleImage(img.src, 'manual-capture');
+    closeModal('capture-modal');
+}
+
+function saveCapture() {
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    link.download = `capture-${timestamp}.jpg`;
+    link.href = document.getElementById('captured-image').src;
+    link.click();
+    addLog('Image saved to downloads', 'info');
+}
+
+// Auto-processing
+function startAutoProcessing() {
+    if (autoProcessInterval) {
+        clearInterval(autoProcessInterval);
+    }
+    
+    autoProcessInterval = setInterval(() => {
+        if (isCameraActive && !isProcessing) {
+            processFrame();
+        }
+    }, processingSettings.autoProcessInterval);
+    
+    addLog(`Auto-processing started (${processingSettings.autoProcessInterval}ms interval)`, 'info');
+}
+
+function stopAutoProcessing() {
+    if (autoProcessInterval) {
+        clearInterval(autoProcessInterval);
+        autoProcessInterval = null;
+        addLog('Auto-processing stopped', 'info');
+    }
+}
+
+// Manual frame processing
+async function processFrame() {
+    if (!isCameraActive || isProcessing) return;
+    
+    isProcessing = true;
+    const startTime = performance.now();
+    stats.frameCount++;
+    
+    try {
+        const video = document.getElementById('video-stream');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Apply mirror if needed
+        const isFrontCamera = currentCamera === 'user' || 
+                             (availableCameras[currentCameraIndex]?.label?.toLowerCase().includes('front'));
+        if (isFrontCamera && processingSettings.mirrorFrontCamera) {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+        }
+        
+        ctx.drawImage(video, 0, 0);
+        
+        // Convert to blob for API
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append('image', blob, 'frame.jpg');
+            
+            // Optimized options for live processing
+            const options = {
+                detection: {
+                    use_yolo: true,
+                    use_fallback: false, // Disable for speed
+                    multi_scale: false,
+                    confidence_threshold: processingSettings.confidenceThreshold
+                },
+                ocr: {
+                    engines: [processingSettings.ocrEngine], // Fastest engine
+                    preprocess: true
+                },
+                output: {
+                    save_files: processingSettings.saveResults,
+                    save_to_db: false // Don't save to DB during live processing
+                }
+            };
+            
+            formData.append('options', JSON.stringify(options));
+            
+            // Send to processing API
+            const response = await fetch('/api/process/single', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const result = await response.json();
+            const processingTime = performance.now() - startTime;
+            
+            // Update statistics
+            stats.framesProcessed++;
+            stats.totalProcessingTime += processingTime;
+            
+            // Handle results
+            if (result.success && result.plates && result.plates.length > 0) {
+                stats.platesDetected += result.plates.length;
+                result.plates.forEach(plate => {
+                    if (plate.best_ocr?.confidence) {
+                        stats.totalConfidence += plate.best_ocr.confidence;
+                    }
+                });
+                
+                // Add to results list
+                addResult(result, processingTime);
+                
+                // Draw detections on overlay
+                if (processingSettings.showDetections) {
+                    drawDetections(result.plates);
+                }
+                
+                addLog(`Detected ${result.plates.length} plate(s) in ${processingTime.toFixed(0)}ms`, 'success');
+            } else {
+                addLog(`No plates detected in ${processingTime.toFixed(0)}ms`, 'info');
+            }
+            
+            // Update stats display
+            updateStatsDisplay();
+            
+            isProcessing = false;
+            
+        }, 'image/jpeg', 0.8);
+        
+    } catch (error) {
+        console.error('Processing error:', error);
+        addLog(`Processing failed: ${error.message}`, 'error');
+        isProcessing = false;
+    }
+}
+
+// Process single image (for captured frames)
+async function processSingleImage(imageData, source = 'manual') {
+    isProcessing = true;
+    addLog(`Processing ${source} image...`, 'info');
+    
+    try {
+        // Convert data URL to blob
+        const blob = dataURLtoBlob(imageData);
+        const formData = new FormData();
+        formData.append('image', blob, `${source}.jpg`);
+        
+        const options = {
+            detection: {
+                use_yolo: true,
+                use_fallback: true,
+                multi_scale: true,
+                confidence_threshold: processingSettings.confidenceThreshold
+            },
+            ocr: {
+                engines: ['easyocr', 'tesseract'],
+                preprocess: true
+            },
+            output: {
+                save_files: true,
+                save_to_db: true
+            }
+        };
+        
+        formData.append('options', JSON.stringify(options));
+        
+        const response = await fetch('/api/process/single', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        const processingTime = performance.now() - Date.now();
+        
+        // Handle results
+        if (result.success && result.plates && result.plates.length > 0) {
+            stats.platesDetected += result.plates.length;
+            result.plates.forEach(plate => {
+                if (plate.best_ocr?.confidence) {
+                    stats.totalConfidence += plate.best_ocr.confidence;
+                }
+            });
+            
+            // Add to results list
+            addResult(result, processingTime);
+            addLog(`Processed ${source}: ${result.plates.length} plate(s) detected`, 'success');
+            
+            // Draw detections if we have an overlay context
+            if (canvasOverlay && processingSettings.showDetections && result.plates.length > 0) {
+                drawDetections(result.plates);
+            }
+        } else {
+            addLog(`No plates detected in ${source} image`, 'info');
+        }
+        
+        updateStatsDisplay();
+        
+        showNotification('Image processed successfully', 'success');
+        
+    } catch (error) {
+        console.error('Image processing error:', error);
+        addLog(`Image processing failed: ${error.message}`, 'error');
+        showNotification('Failed to process image: ' + error.message, 'error');
+    } finally {
+        isProcessing = false;
+    }
+}
+
+// Draw detection boxes on overlay
+function drawDetections(plates) {
+    if (!plates || plates.length === 0 || !canvasOverlay) return;
+    
+    const video = document.getElementById('video-stream');
+    if (!video) return;
+    
+    // Clear previous drawings
+    overlayCtx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+    
+    // Calculate scaling factors if needed
+    const scaleX = canvasOverlay.width / video.videoWidth;
+    const scaleY = canvasOverlay.height / video.videoHeight;
+    
+    // Draw each detection
+    plates.forEach((plate, index) => {
+        const detection = plate.detection;
+        if (!detection || !detection.bbox) return;
+        
+        const [x1, y1, x2, y2] = detection.bbox;
+        const confidence = detection.confidence || 0;
+        const bestOcr = plate.best_ocr;
+        const isBest = index === 0; // First detection is usually the best
+        
+        // Scale coordinates
+        const scaledX1 = x1 * scaleX;
+        const scaledY1 = y1 * scaleY;
+        const scaledX2 = x2 * scaleX;
+        const scaledY2 = y2 * scaleY;
+        const width = scaledX2 - scaledX1;
+        const height = scaledY2 - scaledY1;
+        
+        // Draw bounding box
+        overlayCtx.strokeStyle = isBest ? '#00ff00' : '#ffff00';
+        overlayCtx.lineWidth = 2;
+        overlayCtx.strokeRect(scaledX1, scaledY1, width, height);
+        
+        // Draw label background
+        const label = `Plate ${index + 1}: ${(confidence * 100).toFixed(1)}%`;
+        overlayCtx.fillStyle = isBest ? 'rgba(0, 255, 0, 0.8)' : 'rgba(255, 255, 0, 0.8)';
+        overlayCtx.font = '12px Arial';
+        const textWidth = overlayCtx.measureText(label).width;
+        
+        overlayCtx.fillRect(scaledX1, scaledY1 - 18, textWidth + 10, 18);
+        
+        // Draw label text
+        overlayCtx.fillStyle = '#000';
+        overlayCtx.fillText(label, scaledX1 + 5, scaledY1 - 4);
+        
+        // Draw OCR text if available and enabled
+        if (bestOcr && bestOcr.text && processingSettings.showOcrText) {
+            const ocrText = bestOcr.text;
+            const ocrConfidence = bestOcr.confidence ? ` (${(bestOcr.confidence * 100).toFixed(1)}%)` : '';
+            const fullText = ocrText + ocrConfidence;
+            const ocrTextWidth = overlayCtx.measureText(fullText).width;
+            
+            overlayCtx.fillStyle = 'rgba(99, 102, 241, 0.8)';
+            overlayCtx.fillRect(scaledX1, scaledY2, Math.max(ocrTextWidth, textWidth) + 10, 20);
+            
+            overlayCtx.fillStyle = '#fff';
+            overlayCtx.font = 'bold 12px Arial';
+            overlayCtx.fillText(fullText, scaledX1 + 5, scaledY2 + 15);
+        }
+    });
+}
+
+// Add result to list
+function addResult(result, processingTime) {
+    const resultsList = document.getElementById('results-list');
+    const emptyResults = document.getElementById('empty-results');
+    
+    // Hide empty message
+    if (emptyResults.style.display !== 'none') {
+        emptyResults.style.display = 'none';
+    }
+    
+    // Create a thumbnail for each plate
+    result.plates.forEach((plate, plateIndex) => {
+        // Create thumbnail
+        const canvas = document.createElement('canvas');
+        canvas.width = 80;
+        canvas.height = 60;
+        const ctx = canvas.getContext('2d');
+        
+        // Create gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 80, 60);
+        gradient.addColorStop(0, '#6366f1');
+        gradient.addColorStop(1, '#8b5cf6');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 80, 60);
+        
+        // Add plate text
+        const plateText = plate.best_ocr?.text || 'N/A';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(plateText.substring(0, 10), 40, 30);
+        
+        const thumbnailUrl = canvas.toDataURL();
+        
+        // Create result item
+        const resultItem = document.createElement('div');
+        resultItem.className = 'result-item';
+        resultItem.dataset.resultId = results.length;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        const confidence = plate.best_ocr?.confidence ? 
+            (plate.best_ocr.confidence * 100).toFixed(1) + '%' : 'N/A';
+        
+        resultItem.innerHTML = `
+            <div class="result-status success"></div>
+            <div class="result-thumbnail">
+                <img src="${thumbnailUrl}" alt="Plate thumbnail">
+            </div>
+            <div class="result-content">
+                <div class="result-plate">${plateText}</div>
+                <div class="result-meta">
+                    <span>${confidence}</span>
+                    <span>•</span>
+                    <span>${processingTime ? processingTime.toFixed(0) + 'ms' : ''}</span>
+                    <span>•</span>
+                    <span>${timestamp}</span>
+                </div>
+            </div>
+            <div class="result-actions">
+                <button class="btn btn-sm btn-outline" onclick="viewResultDetails(${results.length}, ${plateIndex})">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline" onclick="saveResult(${results.length}, ${plateIndex})">
+                    <i class="fas fa-save"></i>
+                </button>
+            </div>
+        `;
+        
+        // Add to beginning of list
+        resultsList.insertBefore(resultItem, resultsList.firstChild);
+        
+        // Store result
+        results.unshift({
+            ...result,
+            plateIndex: plateIndex,
+            processingTime: processingTime,
+            timestamp: new Date().toISOString(),
+            thumbnail: thumbnailUrl
+        });
+        
+        // Also store in detection history for analytics
+        detectionHistory.push({
+            timestamp: Date.now(),
+            plates: result.plates?.length || 0,
+            confidence: plate.best_ocr?.confidence || 0,
+            processingTime: processingTime
+        });
+    });
+    
+    // Limit stored results
+    while (results.length > processingSettings.maxResults) {
+        results.pop();
+        if (resultsList.children.length > processingSettings.maxResults) {
+            resultsList.removeChild(resultsList.lastChild);
+        }
+    }
+    
+    // Save to backend if enabled
+    if (processingSettings.saveResults && result.success) {
+        saveResultsToBackend(result);
+    }
+}
+
+// Update statistics display
+function updateStatsDisplay() {
+    // FPS is updated separately
+    document.getElementById('stat-frames').textContent = stats.framesProcessed;
+    document.getElementById('stat-detections').textContent = stats.platesDetected;
+    
+    const avgConfidence = stats.platesDetected > 0 ? 
+        Math.round((stats.totalConfidence / stats.platesDetected) * 100) : 0;
+    document.getElementById('stat-confidence').textContent = avgConfidence + '%';
+    
+    const avgProcessingTime = stats.framesProcessed > 0 ? 
+        Math.round(stats.totalProcessingTime / stats.framesProcessed) : 0;
+    document.getElementById('stat-processing').textContent = avgProcessingTime + 'ms';
+}
+
+// FPS counter
+function startFpsCounter() {
+    let lastTime = performance.now();
+    let frames = 0;
+    
+    fpsInterval = setInterval(() => {
+        const currentTime = performance.now();
+        const elapsed = currentTime - lastTime;
+        
+        if (elapsed >= 1000) {
+            stats.fps = Math.round((frames * 1000) / elapsed);
+            document.getElementById('stat-fps').textContent = stats.fps;
+            frames = 0;
+            lastTime = currentTime;
+        }
+    }, 100);
+    
+    // Count frames from video stream
+    function countFrame() {
+        if (isCameraActive) {
+            frames++;
+        }
+        requestAnimationFrame(countFrame);
+    }
+    
+    countFrame();
+}
+
+// Log management
+function addLog(message, type = 'info') {
+    const logContainer = document.getElementById('log-container');
+    const timestamp = new Date().toLocaleTimeString();
+    
+    const logEntry = document.createElement('div');
+    logEntry.className = `log-entry ${type}`;
+    logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span> ${escapeHtml(message)}`;
+    
+    logContainer.appendChild(logEntry);
+    
+    // Auto-scroll
+    logContainer.scrollTop = logContainer.scrollHeight;
+    
+    // Limit entries
+    if (logContainer.children.length > 100) {
+        logContainer.removeChild(logContainer.firstChild);
+    }
+}
+
+function clearLog() {
+    const logContainer = document.getElementById('log-container');
+    logContainer.innerHTML = `
+        <div class="log-entry info">
+            <span class="log-time">[${new Date().toLocaleTimeString()}]</span> Log cleared
+        </div>
+    `;
+    addLog('Log cleared', 'info');
+}
+
+// Results management
+function clearResults() {
+    if (!confirm('Are you sure you want to clear all results?')) return;
+    
+    results = [];
+    detectionHistory = [];
+    
+    document.getElementById('results-list').innerHTML = `
+        <div class="empty-results" id="empty-results">
+            <i class="fas fa-search"></i>
+            <p>No plates detected yet</p>
+            <p>Start camera and processing to see live results</p>
+        </div>
+    `;
+    
+    // Reset stats (except FPS)
+    stats.framesProcessed = 0;
+    stats.platesDetected = 0;
+    stats.totalConfidence = 0;
+    stats.totalProcessingTime = 0;
+    stats.frameCount = 0;
+    
+    updateStatsDisplay();
+    addLog('Results cleared', 'info');
+}
+
+function exportResults() {
+    if (results.length === 0) {
+        showNotification('No results to export', 'warning');
+        return;
+    }
+    
+    // Prepare export data
+    const exportData = {
+        timestamp: new Date().toISOString(),
+        total_detections: results.length,
+        average_confidence: stats.platesDetected > 0 ? 
+            (stats.totalConfidence / stats.platesDetected) : 0,
+        average_processing_time: stats.framesProcessed > 0 ? 
+            (stats.totalProcessingTime / stats.framesProcessed) : 0,
+        camera_settings: processingSettings,
+        results: results.map(r => ({
+            timestamp: r.timestamp,
+            plate_text: r.plates?.[r.plateIndex]?.best_ocr?.text,
+            confidence: r.plates?.[r.plateIndex]?.best_ocr?.confidence,
+            engine: r.plates?.[r.plateIndex]?.best_ocr?.engine,
+            processing_time: r.processingTime,
+            success: r.success,
+            detection_count: r.plates?.length || 0
+        }))
+    };
+    
+    // Create and download JSON file
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', dataUri);
+    link.setAttribute('download', `plate-detections-${timestamp}.json`);
+    link.click();
+    
+    addLog('Results exported as JSON', 'success');
+    showNotification('Results exported successfully', 'success');
+}
+
+function viewResultDetails(resultIndex, plateIndex) {
+    const result = results[resultIndex];
+    if (!result || !result.plates || !result.plates[plateIndex]) return;
+    
+    const plate = result.plates[plateIndex];
+    const detailsContainer = document.getElementById('detection-details');
+    
+    let detailsHtml = `
+        <div class="detail-item">
+            <div class="detail-label">Plate Text</div>
+            <div class="detail-value plate-text">${plate.best_ocr?.text || 'N/A'}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Confidence</div>
+            <div class="detail-value">${plate.best_ocr?.confidence ? 
+                (plate.best_ocr.confidence * 100).toFixed(1) + '%' : 'N/A'}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">OCR Engine</div>
+            <div class="detail-value">${plate.best_ocr?.engine || 'N/A'}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Processing Time</div>
+            <div class="detail-value">${result.processingTime?.toFixed(0) || 'N/A'}ms</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Detection Confidence</div>
+            <div class="detail-value">${plate.detection?.confidence ? 
+                (plate.detection.confidence * 100).toFixed(1) + '%' : 'N/A'}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Timestamp</div>
+            <div class="detail-value">${new Date(result.timestamp).toLocaleString()}</div>
+        </div>
+    `;
+    
+    // Add plate images if available
+    if (plate.cropped_path || plate.enhanced_path) {
+        detailsHtml += `
+            <div class="detail-item" style="grid-column: 1 / -1;">
+                <div class="detail-label">Plate Images</div>
+                <div class="detail-value">
+                    <div class="detail-images">
+        `;
+        
+        if (plate.cropped_path) {
+            const croppedUrl = convertLocalPathToUrl(plate.cropped_path);
+            detailsHtml += `
+                <div class="detail-image">
+                    <div style="font-size: 0.75rem; color: #94a3b8; padding: 0.5rem; text-align: center;">Cropped</div>
+                    <img src="${croppedUrl}" alt="Cropped plate" 
+                         onerror="handleImageError(this, 'Cropped plate')">
+                </div>
+            `;
+        }
+        
+        if (plate.enhanced_path) {
+            const enhancedUrl = convertLocalPathToUrl(plate.enhanced_path);
+            detailsHtml += `
+                <div class="detail-image">
+                    <div style="font-size: 0.75rem; color: #94a3b8; padding: 0.5rem; text-align: center;">Enhanced</div>
+                    <img src="${enhancedUrl}" alt="Enhanced plate" 
+                         onerror="handleImageError(this, 'Enhanced plate')">
+                </div>
+            `;
+        }
+        
+        detailsHtml += `
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Add OCR comparison if available
+    if (plate.ocr_results && Object.keys(plate.ocr_results).length > 0) {
+        detailsHtml += `
+            <div class="detail-item" style="grid-column: 1 / -1;">
+                <div class="detail-label">OCR Comparison</div>
+                <div class="detail-value">
+                    <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+        `;
+        
+        for (const [engine, ocrResult] of Object.entries(plate.ocr_results)) {
+            const isBest = plate.best_ocr?.engine?.includes(engine);
+            detailsHtml += `
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 0.5rem; 
+                           background: ${isBest ? 'rgba(99, 102, 241, 0.1)' : 'transparent'};
+                           border-radius: 4px; border: 1px solid ${isBest ? '#6366f1' : '#475569'};">
+                    <span style="font-weight: 600; min-width: 80px; text-transform: capitalize;">${engine}</span>
+                    <span style="flex: 1; font-family: 'JetBrains Mono', monospace;">${ocrResult.text || 'No text'}</span>
+                    <span style="color: #94a3b8;">${(ocrResult.confidence * 100).toFixed(1)}%</span>
+                    ${isBest ? '<span style="color: #6366f1; font-size: 0.875rem;">(Best)</span>' : ''}
+                </div>
+            `;
+        }
+        
+        detailsHtml += `
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    detailsContainer.innerHTML = detailsHtml;
+    openModal('details-modal');
+}
+
+async function saveResult(resultIndex, plateIndex) {
+    const result = results[resultIndex];
+    const plate = result?.plates?.[plateIndex];
+    
+    if (!result || !plate || !result.success) {
+        showNotification('Cannot save this result', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/results/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...result,
+                plate: plate,
+                source: 'live_camera'
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Result saved to database', 'success');
+            addLog('Result saved to database', 'success');
+        } else {
+            throw new Error('Failed to save result');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        showNotification('Failed to save result: ' + error.message, 'error');
+        addLog(`Failed to save result: ${error.message}`, 'error');
+    }
+}
+
+async function saveResultsToBackend(result) {
+    if (!result.success) return;
+    
+    try {
+        await fetch('/api/results/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...result,
+                source: 'live_camera_auto'
+            })
+        });
+        // Don't show notification for auto-saves
+    } catch (error) {
+        console.error('Auto-save error:', error);
+    }
+}
+
+// Utility functions
+function dataURLtoBlob(dataurl) {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+}
+
+function convertLocalPathToUrl(localPath) {
+    if (!localPath) return '';
+    
+    // If it's already a URL, return it
+    if (localPath.startsWith('http') || localPath.startsWith('/')) {
+        return localPath;
+    }
+    
+    // Extract filename from local path
+    const pathParts = localPath.split(/[\\\/]/);
+    const filename = pathParts[pathParts.length - 1];
+    
+    // Determine which folder it's in
+    if (localPath.includes('outputs') || localPath.includes('viz_') || 
+        localPath.includes('plate_') || localPath.includes('enhanced_')) {
+        return `/outputs/${filename}`;
+    } else if (localPath.includes('uploads')) {
+        return `/uploads/${filename}`;
+    }
+    
+    // Default fallback
+    return `/outputs/${filename}`;
+}
+
+function handleImageError(imgElement, imageName) {
+    imgElement.style.display = 'none';
+    const parent = imgElement.parentElement;
+    parent.innerHTML = `
+        <div style="padding: 1rem; color: #64748b; text-align: center;">
+            <i class="fas fa-image fa-lg"></i>
+            <div style="margin-top: 0.5rem; font-size: 0.875rem;">${imageName} not available</div>
+        </div>
+    `;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+    if (isCameraActive) {
+        stopCamera();
+    }
+    
+    if (fpsInterval) {
+        clearInterval(fpsInterval);
+    }
+    
+    if (autoProcessInterval) {
+        clearInterval(autoProcessInterval);
+    }
+});
+
+// Global utility function
+window.showNotification = function(message, type = 'info') {
+    // Use the notification system from layout.html
+    const event = new CustomEvent('showNotification', {
+        detail: { message, type }
+    });
+    window.dispatchEvent(event);
+};
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideInUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .modal {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .result-item {
+        animation: slideInUp 0.3s ease;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

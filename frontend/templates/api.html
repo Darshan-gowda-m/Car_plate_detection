@@ -1,0 +1,1669 @@
+{% extends "layout.html" %}
+
+{% block title %}API Documentation - Plate Detection{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== API DOCUMENTATION STYLES ===== */
+.api-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.api-header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 4rem 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3);
+}
+
+.api-header h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.api-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.api-version {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+}
+
+/* Navigation */
+.api-nav {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.api-nav h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: #f8fafc;
+}
+
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.nav-link {
+    padding: 0.5rem 1rem;
+    background: #334155;
+    color: #94a3b8;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.nav-link:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: #6366f1;
+    border-color: #6366f1;
+}
+
+/* Sections */
+.api-section {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.api-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    color: #f8fafc;
+    font-size: 1.5rem;
+}
+
+/* Endpoint Cards */
+.endpoint {
+    background: rgba(51, 65, 85, 0.5);
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    transition: all 0.3s;
+}
+
+.endpoint:hover {
+    border-color: #6366f1;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.1);
+}
+
+.endpoint-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.method {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.method-get {
+    background: linear-gradient(135deg, #61affe 0%, #4299e1 100%);
+    color: white;
+}
+
+.method-post {
+    background: linear-gradient(135deg, #49cc90 0%, #38a169 100%);
+    color: white;
+}
+
+.method-delete {
+    background: linear-gradient(135deg, #f93e3e 0%, #c53030 100%);
+    color: white;
+}
+
+.endpoint-url {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    flex: 1;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    border: 1px solid #475569;
+}
+
+.endpoint-description {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Tables */
+.params-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+}
+
+.params-table th {
+    background: rgba(30, 41, 59, 0.8);
+    color: #cbd5e1;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #475569;
+}
+
+.params-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+    color: #94a3b8;
+}
+
+.params-table tr:last-child td {
+    border-bottom: none;
+}
+
+.param-required {
+    color: #f87171;
+    font-weight: 600;
+}
+
+.param-optional {
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+/* Code Blocks */
+.code-block {
+    background: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    position: relative;
+}
+
+.code-block::before {
+    content: 'TERMINAL';
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #475569;
+    color: #94a3b8;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 0 8px 0 4px;
+}
+
+.code-block pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.code-block .language-bash {
+    color: #10b981;
+}
+
+.code-block .language-json {
+    color: #cbd5e1;
+}
+
+.code-block .language-python {
+    color: #60a5fa;
+}
+
+.code-block .language-javascript {
+    color: #fbbf24;
+}
+
+/* Response Examples */
+.response-example {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.response-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #475569;
+}
+
+.status-code {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.status-200 {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-400 {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-500 {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Quick Start */
+.quickstart-section {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border: 1px solid #6366f1;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.quickstart-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.quickstart-step {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+}
+
+.quickstart-step:hover {
+    border-color: #6366f1;
+    transform: translateY(-2px);
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.quickstart-step h4 {
+    color: #f8fafc;
+    margin-bottom: 0.5rem;
+}
+
+.quickstart-step p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* API Tester */
+.api-tester {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.api-tester h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #f8fafc;
+}
+
+.tester-form {
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #cbd5e1;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    color: #f8fafc;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.form-control::placeholder {
+    color: #64748b;
+}
+
+select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.5;
+}
+
+.btn-try {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-try:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+
+.btn-try:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.tester-result {
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tester-result.success {
+    border-left: 4px solid #10b981;
+}
+
+.tester-result.error {
+    border-left: 4px solid #ef4444;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-content {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    background: #0f172a;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+/* Code Examples */
+.code-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.code-example {
+    background: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.code-header {
+    background: rgba(51, 65, 85, 0.5);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #475569;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #cbd5e1;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.code-content {
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+/* Support Section */
+.support-section {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border: 1px solid #6366f1;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.support-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.support-item {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    transition: all 0.3s;
+}
+
+.support-item:hover {
+    border-color: #6366f1;
+    transform: translateY(-2px);
+}
+
+.support-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.support-item h4 {
+    color: #f8fafc;
+    margin-bottom: 0.5rem;
+}
+
+.support-item p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .api-container {
+        padding: 1rem;
+    }
+    
+    .api-header {
+        padding: 3rem 1rem;
+    }
+    
+    .api-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+    }
+    
+    .endpoint-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .quickstart-steps,
+    .code-examples,
+    .support-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .api-section,
+    .api-tester {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .api-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .api-header h1 i {
+        font-size: 2rem;
+    }
+    
+    .endpoint-url {
+        font-size: 0.8rem;
+        word-break: break-all;
+    }
+    
+    .params-table {
+        font-size: 0.8rem;
+    }
+    
+    .params-table th,
+    .params-table td {
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="api-container">
+    <!-- Header -->
+    <div class="api-header">
+        <h1><i class="fas fa-code"></i> API Documentation</h1>
+        <p class="api-subtitle">Complete REST API reference for Plate Detection System. No authentication required - start using immediately!</p>
+        <div class="api-version">Version 1.0.0 | Public API</div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="api-nav">
+        <h3><i class="fas fa-bookmark"></i> Quick Navigation</h3>
+        <div class="nav-links">
+            <a href="#quickstart" class="nav-link">Quick Start</a>
+            <a href="#endpoints" class="nav-link">Endpoints</a>
+            <a href="#upload" class="nav-link">Upload API</a>
+            <a href="#process" class="nav-link">Process API</a>
+            <a href="#results" class="nav-link">Results API</a>
+            <a href="#system" class="nav-link">System API</a>
+            <a href="#examples" class="nav-link">Code Examples</a>
+            <a href="#tester" class="nav-link">API Tester</a>
+        </div>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="quickstart-section" id="quickstart">
+        <h2><i class="fas fa-rocket"></i> Quick Start</h2>
+        <p>Get started with the Plate Detection API immediately. No API keys or authentication required!</p>
+        
+        <div class="quickstart-steps">
+            <div class="quickstart-step">
+                <div class="step-number">1</div>
+                <h4>Choose Endpoint</h4>
+                <p>Select from our comprehensive REST API endpoints for all plate detection needs</p>
+            </div>
+            <div class="quickstart-step">
+                <div class="step-number">2</div>
+                <h4>Make Request</h4>
+                <p>Use any HTTP client (cURL, Python, JavaScript) to call our API endpoints</p>
+            </div>
+            <div class="quickstart-step">
+                <div class="step-number">3</div>
+                <h4>Get Results</h4>
+                <p>Receive immediate plate detection results with OCR text and confidence scores</p>
+            </div>
+        </div>
+        
+        <div class="code-block">
+<pre><code class="language-bash"># Test the API immediately with cURL:
+curl -X POST "{{ request.url_root }}api/process/single" \
+  -F "image=@your-car-image.jpg"
+
+# Or process from URL:
+curl -X POST "{{ request.url_root }}api/process/url" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/car.jpg"}'
+
+# Get system status:
+curl -X GET "{{ request.url_root }}api/system/health"</code></pre>
+        </div>
+    </div>
+
+    <!-- Endpoints Overview -->
+    <div class="api-section" id="endpoints">
+        <h2><i class="fas fa-code-branch"></i> API Endpoints</h2>
+        <p>Complete list of available REST endpoints. All endpoints are publicly accessible.</p>
+        
+        <div class="params-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Base URL</th>
+                        <th>Methods</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Upload</strong></td>
+                        <td><code>/api/upload</code></td>
+                        <td>POST</td>
+                        <td>File upload endpoints for images</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Process</strong></td>
+                        <td><code>/api/process</code></td>
+                        <td>POST, GET</td>
+                        <td>Image processing and plate detection</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Results</strong></td>
+                        <td><code>/api/results</code></td>
+                        <td>GET, DELETE</td>
+                        <td>Results management and retrieval</td>
+                    </tr>
+                    <tr>
+                        <td><strong>System</strong></td>
+                        <td><code>/api/system</code></td>
+                        <td>GET, POST</td>
+                        <td>System monitoring and management</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Upload API -->
+    <div class="api-section" id="upload">
+        <h2><i class="fas fa-upload"></i> Upload API</h2>
+        <p>Upload image files for processing. Supports single and multiple file uploads.</p>
+        
+        <!-- Single Upload -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-post">POST</span>
+                <span class="endpoint-url">{{ request.url_root }}api/upload/single</span>
+            </div>
+            <div class="endpoint-description">
+                Upload a single image file for processing. Returns file information and preview.
+            </div>
+            
+            <h4>Parameters</h4>
+            <div class="params-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>file</code></td>
+                            <td>File</td>
+                            <td><span class="param-required">Yes</span></td>
+                            <td>Image file (JPG, PNG, BMP, TIFF, WEBP)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X POST "{{ request.url_root }}api/upload/single" \
+  -F "file=@vehicle.jpg"</code></pre>
+            </div>
+            
+            <h4>Response Example</h4>
+            <div class="response-example">
+                <div class="response-header">
+                    <span>Status: <span class="status-code status-200">200 OK</span></span>
+                </div>
+<pre><code class="language-json">{
+  "success": true,
+  "filename": "vehicle.jpg",
+  "saved_as": "vehicle_123456.jpg",
+  "filepath": "uploads/vehicle_123456.jpg",
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "size": 1248576,
+  "size_human": "1.19 MB"
+}</code></pre>
+            </div>
+        </div>
+        
+        <!-- Multiple Upload -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-post">POST</span>
+                <span class="endpoint-url">{{ request.url_root }}api/upload/multiple</span>
+            </div>
+            <div class="endpoint-description">
+                Upload multiple image files at once. Returns array of file information.
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X POST "{{ request.url_root }}api/upload/multiple" \
+  -F "files=@car1.jpg" \
+  -F "files=@car2.jpg" \
+  -F "files=@car3.jpg"</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process API -->
+    <div class="api-section" id="process">
+        <h2><i class="fas fa-cogs"></i> Process API</h2>
+        <p>Process images for license plate detection and OCR. Supports single, batch, and URL processing.</p>
+        
+        <!-- Single Processing -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-post">POST</span>
+                <span class="endpoint-url">{{ request.url_root }}api/process/single</span>
+            </div>
+            <div class="endpoint-description">
+                Process a single image for license plate detection and text recognition.
+            </div>
+            
+            <h4>Parameters</h4>
+            <div class="params-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>image</code></td>
+                            <td>File</td>
+                            <td><span class="param-required">Yes</span></td>
+                            <td>Image file to process</td>
+                        </tr>
+                        <tr>
+                            <td><code>options</code></td>
+                            <td>JSON</td>
+                            <td><span class="param-optional">Optional</span></td>
+                            <td>Processing options (see example)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>Options JSON Structure</h4>
+            <div class="code-block">
+<pre><code class="language-json">{
+  "detection": {
+    "use_yolo": true,
+    "use_fallback": true,
+    "multi_scale": true,
+    "confidence_threshold": 0.25
+  },
+  "ocr": {
+    "engines": {
+      "easyocr": true,
+      "tesseract": true,
+      "google_vision": false
+    },
+    "preprocess": true,
+    "confidence_threshold": 0.5
+  },
+  "output": {
+    "save_files": true,
+    "save_cropped": true,
+    "save_visualization": true
+  }
+}</code></pre>
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X POST "{{ request.url_root }}api/process/single" \
+  -F "image=@car.jpg" \
+  -F 'options={"detection":{"use_yolo":true},"ocr":{"engines":["easyocr"]}}'</code></pre>
+            </div>
+            
+            <h4>Response Example</h4>
+            <div class="response-example">
+                <div class="response-header">
+                    <span>Status: <span class="status-code status-200">200 OK</span></span>
+                </div>
+<pre><code class="language-json">{
+  "success": true,
+  "filepath": "uploads/car.jpg",
+  "detections": [
+    {
+      "bbox": [100, 150, 300, 200],
+      "confidence": 0.95,
+      "method": "yolo",
+      "class": 0
+    }
+  ],
+  "ocr_results": {
+    "easyocr": {
+      "text": "ABC123",
+      "confidence": 0.89,
+      "processing_time": 0.15,
+      "is_best": true
+    }
+  },
+  "best_detection": {
+    "bbox": [100, 150, 300, 200],
+    "confidence": 0.95,
+    "method": "yolo"
+  },
+  "best_ocr": {
+    "engine": "easyocr",
+    "text": "ABC123",
+    "confidence": 0.89,
+    "processing_time": 0.15
+  },
+  "processing_time": 1.25,
+  "detection_time": 1.10,
+  "ocr_time": 0.15,
+  "output_files": {
+    "cropped": "outputs/cropped_car.jpg",
+    "visualization": "outputs/detection_car.jpg"
+  }
+}</code></pre>
+            </div>
+        </div>
+        
+        <!-- Batch Processing -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-post">POST</span>
+                <span class="endpoint-url">{{ request.url_root }}api/process/batch</span>
+            </div>
+            <div class="endpoint-description">
+                Process multiple images in batch mode. Returns a job ID for tracking progress.
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X POST "{{ request.url_root }}api/process/batch" \
+  -F "images=@car1.jpg" \
+  -F "images=@car2.jpg" \
+  -F "images=@car3.jpg" \
+  -F 'options={"max_workers":4}'</code></pre>
+            </div>
+            
+            <h4>Response Example</h4>
+            <div class="response-example">
+                <div class="response-header">
+                    <span>Status: <span class="status-code status-202">202 Accepted</span></span>
+                </div>
+<pre><code class="language-json">{
+  "job_id": "batch_123456",
+  "message": "Batch processing started",
+  "total_files": 3
+}</code></pre>
+            </div>
+        </div>
+        
+        <!-- Batch Status -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/process/batch/&lt;job_id&gt;/status</span>
+            </div>
+            <div class="endpoint-description">
+                Get the status and progress of a batch processing job.
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X GET "{{ request.url_root }}api/process/batch/batch_123456/status"</code></pre>
+            </div>
+            
+            <h4>Response Example</h4>
+            <div class="response-example">
+                <div class="response-header">
+                    <span>Status: <span class="status-code status-200">200 OK</span></span>
+                </div>
+<pre><code class="language-json">{
+  "job_id": "batch_123456",
+  "status": "processing",
+  "progress": 50,
+  "processed_files": 2,
+  "total_files": 3,
+  "successful_files": 2,
+  "failed_files": 0
+}</code></pre>
+            </div>
+        </div>
+        
+        <!-- URL Processing -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-post">POST</span>
+                <span class="endpoint-url">{{ request.url_root }}api/process/url</span>
+            </div>
+            <div class="endpoint-description">
+                Process an image from a URL without uploading files. Useful for web integration.
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X POST "{{ request.url_root }}api/process/url" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/car.jpg"}'</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results API -->
+    <div class="api-section" id="results">
+        <h2><i class="fas fa-database"></i> Results API</h2>
+        <p>Retrieve, manage, and export plate detection results.</p>
+        
+        <!-- Get Results -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/results</span>
+            </div>
+            <div class="endpoint-description">
+                Get paginated results with powerful filtering options.
+            </div>
+            
+            <h4>Query Parameters</h4>
+            <div class="params-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>page</code></td>
+                            <td>Integer</td>
+                            <td>1</td>
+                            <td>Page number for pagination</td>
+                        </tr>
+                        <tr>
+                            <td><code>per_page</code></td>
+                            <td>Integer</td>
+                            <td>20</td>
+                            <td>Results per page (max 100)</td>
+                        </tr>
+                        <tr>
+                            <td><code>engine</code></td>
+                            <td>String</td>
+                            <td>All</td>
+                            <td>Filter by OCR engine (easyocr, tesseract, google)</td>
+                        </tr>
+                        <tr>
+                            <td><code>min_confidence</code></td>
+                            <td>Float</td>
+                            <td>0</td>
+                            <td>Minimum confidence score (0.0 to 1.0)</td>
+                        </tr>
+                        <tr>
+                            <td><code>start_date</code></td>
+                            <td>String</td>
+                            <td>None</td>
+                            <td>Start date in ISO format (YYYY-MM-DD)</td>
+                        </tr>
+                        <tr>
+                            <td><code>end_date</code></td>
+                            <td>String</td>
+                            <td>None</td>
+                            <td>End date in ISO format (YYYY-MM-DD)</td>
+                        </tr>
+                        <tr>
+                            <td><code>search</code></td>
+                            <td>String</td>
+                            <td>None</td>
+                            <td>Search in filename or detected text</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X GET "{{ request.url_root }}api/results?page=1&per_page=10&min_confidence=0.8&engine=easyocr"</code></pre>
+            </div>
+        </div>
+        
+        <!-- Get Single Result -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/results/&lt;result_id&gt;</span>
+            </div>
+            <div class="endpoint-description">
+                Get detailed information about a specific detection result.
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X GET "{{ request.url_root }}api/results/123456"</code></pre>
+            </div>
+        </div>
+        
+        <!-- Export Results -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/results/export</span>
+            </div>
+            <div class="endpoint-description">
+                Export results in various formats (JSON, CSV, Excel) for analysis.
+            </div>
+            
+            <h4>Query Parameters</h4>
+            <div class="params-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>format</code></td>
+                            <td>String</td>
+                            <td>json</td>
+                            <td>Export format: json, csv, excel</td>
+                        </tr>
+                        <tr>
+                            <td><code>start_date</code></td>
+                            <td>String</td>
+                            <td>None</td>
+                            <td>Start date for filtering</td>
+                        </tr>
+                        <tr>
+                            <td><code>end_date</code></td>
+                            <td>String</td>
+                            <td>None</td>
+                            <td>End date for filtering</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X GET "{{ request.url_root }}api/results/export?format=csv&start_date=2024-01-01" \
+  --output results.csv</code></pre>
+            </div>
+        </div>
+        
+        <!-- Get Statistics -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/results/stats</span>
+            </div>
+            <div class="endpoint-description">
+                Get comprehensive system statistics and performance metrics.
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X GET "{{ request.url_root }}api/results/stats"</code></pre>
+            </div>
+            
+            <h4>Response Example</h4>
+            <div class="response-example">
+                <div class="response-header">
+                    <span>Status: <span class="status-code status-200">200 OK</span></span>
+                </div>
+<pre><code class="language-json">{
+  "overview": {
+    "total_results": 1250,
+    "recent_results": 50,
+    "avg_confidence": 0.85,
+    "max_confidence": 0.99,
+    "min_confidence": 0.45
+  },
+  "engine_stats": {
+    "easyocr": {
+      "count": 800,
+      "avg_confidence": 0.87,
+      "avg_time": 0.15
+    },
+    "tesseract": {
+      "count": 300,
+      "avg_confidence": 0.82,
+      "avg_time": 0.25
+    }
+  },
+  "daily_stats": [
+    {
+      "date": "2024-01-01",
+      "count": 25,
+      "avg_confidence": 0.84
+    }
+  ]
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- System API -->
+    <div class="api-section" id="system">
+        <h2><i class="fas fa-server"></i> System API</h2>
+        <p>Monitor system health, get metrics, and manage system resources.</p>
+        
+        <!-- Health Check -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/system/health</span>
+            </div>
+            <div class="endpoint-description">
+                Check system health and component status. Essential for monitoring.
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X GET "{{ request.url_root }}api/system/health"</code></pre>
+            </div>
+            
+            <h4>Response Example</h4>
+            <div class="response-example">
+                <div class="response-header">
+                    <span>Status: <span class="status-code status-200">200 OK</span></span>
+                </div>
+<pre><code class="language-json">{
+  "status": "healthy",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "components": {
+    "detector": true,
+    "ocr_manager": true,
+    "worker": true,
+    "database": true,
+    "storage": true
+  },
+  "system_info": {
+    "platform": "Linux",
+    "python_version": "3.9.0"
+  }
+}</code></pre>
+            </div>
+        </div>
+        
+        <!-- Get Metrics -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/system/metrics</span>
+            </div>
+            <div class="endpoint-description">
+                Get real-time system performance metrics (CPU, memory, disk usage).
+            </div>
+            
+            <h4>Example Request</h4>
+            <div class="code-block">
+<pre><code class="language-bash">curl -X GET "{{ request.url_root }}api/system/metrics"</code></pre>
+            </div>
+        </div>
+        
+        <!-- Get Configuration -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <span class="endpoint-url">{{ request.url_root }}api/system/config</span>
+            </div>
+            <div class="endpoint-description">
+                Get system configuration (non-sensitive information).
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Examples -->
+    <div class="api-section" id="examples">
+        <h2><i class="fas fa-laptop-code"></i> Code Examples</h2>
+        <p>Ready-to-use code examples for popular programming languages.</p>
+        
+        <div class="code-examples">
+            <!-- Python Example -->
+            <div class="code-example">
+                <div class="code-header">
+                    <i class="fab fa-python"></i> Python
+                </div>
+                <div class="code-content">
+<pre><code class="language-python">import requests
+import json
+
+def process_plate_image(image_path, options=None):
+    """Process vehicle image for plate detection"""
+    url = "{{ request.url_root }}api/process/single"
+    
+    with open(image_path, 'rb') as f:
+        files = {'image': f}
+        data = {'options': json.dumps(options or {})}
+        
+        response = requests.post(url, files=files, data=data)
+        return response.json()
+
+# Usage
+result = process_plate_image('car.jpg', {
+    'detection': {'use_yolo': True},
+    'ocr': {'engines': ['easyocr']}
+})
+
+if result['success']:
+    plate_text = result['best_ocr']['text']
+    confidence = result['best_ocr']['confidence']
+    print(f"Plate: {plate_text} ({confidence*100:.1f}% confidence)")</code></pre>
+                </div>
+            </div>
+            
+            <!-- JavaScript Example -->
+            <div class="code-example">
+                <div class="code-header">
+                    <i class="fab fa-js"></i> JavaScript
+                </div>
+                <div class="code-content">
+<pre><code class="language-javascript">async function processImage(imageFile, options = {}) {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    formData.append('options', JSON.stringify(options));
+    
+    const response = await fetch('{{ request.url_root }}api/process/single', {
+        method: 'POST',
+        body: formData
+    });
+    
+    return await response.json();
+}
+
+// Usage with file input
+const fileInput = document.getElementById('image-upload');
+fileInput.addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    const result = await processImage(file, {
+        detection: { use_yolo: true },
+        ocr: { engines: ['easyocr'] }
+    });
+    
+    if (result.success) {
+        console.log('Detected plate:', result.best_ocr.text);
+    }
+});</code></pre>
+                </div>
+            </div>
+            
+            <!-- cURL Examples -->
+            <div class="code-example">
+                <div class="code-header">
+                    <i class="fas fa-terminal"></i> cURL
+                </div>
+                <div class="code-content">
+<pre><code class="language-bash"># 1. Process single image
+curl -X POST "{{ request.url_root }}api/process/single" \
+  -F "image=@car.jpg"
+
+# 2. Batch process
+curl -X POST "{{ request.url_root }}api/process/batch" \
+  -F "images=@car1.jpg" \
+  -F "images=@car2.jpg"
+
+# 3. Process from URL
+curl -X POST "{{ request.url_root }}api/process/url" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/car.jpg"}'
+
+# 4. Get results
+curl -X GET "{{ request.url_root }}api/results?per_page=5"
+
+# 5. Get system health
+curl -X GET "{{ request.url_root }}api/system/health"</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Tester -->
+    <div class="api-tester" id="tester">
+        <h3><i class="fas fa-flask"></i> API Tester</h3>
+        <p>Test API endpoints directly from your browser.</p>
+        
+        <div class="tester-form">
+            <div class="form-group">
+                <label>Select Endpoint</label>
+                <select id="endpoint-select" class="form-control" onchange="updateTesterForm()">
+                    <option value="/api/process/single">POST /api/process/single</option>
+                    <option value="/api/process/batch">POST /api/process/batch</option>
+                    <option value="/api/process/url">POST /api/process/url</option>
+                    <option value="/api/results">GET /api/results</option>
+                    <option value="/api/results/stats">GET /api/results/stats</option>
+                    <option value="/api/system/health">GET /api/system/health</option>
+                    <option value="/api/system/metrics">GET /api/system/metrics</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="file-input-group">
+                <label>Image File</label>
+                <input type="file" id="file-input" class="form-control" accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp">
+            </div>
+            
+            <div class="form-group" id="url-input-group" style="display: none;">
+                <label>Image URL</label>
+                <input type="url" id="url-input" class="form-control" 
+                       placeholder="https://example.com/vehicle-image.jpg">
+            </div>
+            
+            <div class="form-group" id="options-input-group">
+                <label>Options (JSON - Optional)</label>
+                <textarea id="options-input" class="form-control" rows="4">{
+  "detection": {
+    "use_yolo": true,
+    "use_fallback": true
+  },
+  "ocr": {
+    "engines": ["easyocr"]
+  }
+}</textarea>
+            </div>
+            
+            <button class="btn-try" onclick="testApiEndpoint()" id="test-button">
+                <i class="fas fa-play"></i> Test API Endpoint
+            </button>
+        </div>
+        
+        <div class="tester-result" id="tester-result">
+            <div id="result-content"></div>
+        </div>
+    </div>
+
+    <!-- Support Section -->
+    <div class="support-section">
+        <h2><i class="fas fa-hands-helping"></i> Need Help?</h2>
+        <p>Get assistance and resources for using the Plate Detection API.</p>
+        
+        <div class="support-grid">
+            <div class="support-item">
+                <div class="support-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h4>Documentation</h4>
+                <p>Complete API reference with detailed examples and explanations</p>
+            </div>
+            
+            <div class="support-item">
+                <div class="support-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h4>Code Examples</h4>
+                <p>Ready-to-use examples in Python, JavaScript, cURL, and more</p>
+            </div>
+            
+            <div class="support-item">
+                <div class="support-icon">
+                    <i class="fas fa-bug"></i>
+                </div>
+                <h4>Report Issues</h4>
+                <p>Found a bug or have a feature request? Let us know</p>
+            </div>
+            
+            <div class="support-item">
+                <div class="support-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h4>Quick Start</h4>
+                <p>Get started in minutes with our simple API integration</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update tester form based on selected endpoint
+function updateTesterForm() {
+    const endpoint = document.getElementById('endpoint-select').value;
+    const fileGroup = document.getElementById('file-input-group');
+    const urlGroup = document.getElementById('url-input-group');
+    const optionsGroup = document.getElementById('options-input-group');
+    
+    // Show/hide appropriate inputs
+    if (endpoint.includes('/process/url')) {
+        fileGroup.style.display = 'none';
+        urlGroup.style.display = 'block';
+        optionsGroup.style.display = 'block';
+    } else if (endpoint.includes('/process/')) {
+        fileGroup.style.display = 'block';
+        urlGroup.style.display = 'none';
+        optionsGroup.style.display = 'block';
+    } else {
+        fileGroup.style.display = 'none';
+        urlGroup.style.display = 'none';
+        optionsGroup.style.display = 'none';
+    }
+}
+
+// Test API endpoint
+async function testApiEndpoint() {
+    const endpoint = document.getElementById('endpoint-select').value;
+    const fileInput = document.getElementById('file-input');
+    const urlInput = document.getElementById('url-input');
+    const optionsInput = document.getElementById('options-input');
+    const resultDiv = document.getElementById('tester-result');
+    const resultContent = document.getElementById('result-content');
+    const testButton = document.getElementById('test-button');
+    
+    // Reset and show loading
+    resultDiv.style.display = 'none';
+    resultDiv.className = 'tester-result';
+    resultContent.innerHTML = '';
+    testButton.disabled = true;
+    testButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    
+    try {
+        let response;
+        
+        if (endpoint.includes('/process/url')) {
+            // URL processing endpoint
+            const url = urlInput.value.trim();
+            if (!url) {
+                throw new Error('Please enter a valid image URL');
+            }
+            
+            const data = {
+                url: url
+            };
+            
+            if (optionsInput.value.trim()) {
+                try {
+                    data.options = JSON.parse(optionsInput.value);
+                } catch (e) {
+                    throw new Error('Invalid JSON in options field');
+                }
+            }
+            
+            response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+        } else if (endpoint.includes('/process/')) {
+            // File processing endpoint
+            if (!fileInput.files.length) {
+                throw new Error('Please select an image file');
+            }
+            
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            
+            if (optionsInput.value.trim()) {
+                try {
+                    JSON.parse(optionsInput.value);
+                    formData.append('options', optionsInput.value);
+                } catch (e) {
+                    throw new Error('Invalid JSON in options field');
+                }
+            }
+            
+            response = await fetch(endpoint, {
+                method: 'POST',
+                body: formData
+            });
+        } else {
+            // GET endpoints
+            response = await fetch(endpoint);
+        }
+        
+        const data = await response.json();
+        
+        // Display result
+        resultDiv.style.display = 'block';
+        resultDiv.classList.add(response.ok ? 'success' : 'error');
+        
+        const statusBadge = response.ok ? 
+            `<span class="status-code status-200">${response.status} OK</span>` :
+            `<span class="status-code status-400">${response.status} Error</span>`;
+        
+        resultContent.innerHTML = `
+            <div class="response-header">
+                ${statusBadge}
+                <span>${new Date().toLocaleTimeString()}</span>
+            </div>
+            <pre><code class="language-json">${JSON.stringify(data, null, 2)}</code></pre>
+        `;
+        
+        // Scroll to results
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.classList.add('error');
+        resultContent.innerHTML = `
+            <div class="response-header">
+                <span class="status-code status-500">Error</span>
+                <span>${new Date().toLocaleTimeString()}</span>
+            </div>
+            <p><strong>Error:</strong> ${error.message}</p>
+            <p>Check the browser console for more details.</p>
+        `;
+        console.error('API test error:', error);
+    } finally {
+        testButton.disabled = false;
+        testButton.innerHTML = '<i class="fas fa-play"></i> Test API Endpoint';
+    }
+}
+
+// Initialize tester form
+document.addEventListener('DOMContentLoaded', function() {
+    updateTesterForm();
+    
+    // Add keyboard shortcut (Ctrl+Enter) to test
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            testApiEndpoint();
+        }
+    });
+});
+
+// Copy to clipboard function
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Copied to clipboard!', 'success');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        showNotification('Failed to copy to clipboard', 'error');
+    });
+}
+
+// Show notification (using global function from layout)
+function showNotification(message, type = 'info') {
+    if (window.UIUtils && window.UIUtils.showNotification) {
+        window.UIUtils.showNotification(message, type);
+    } else {
+        alert(`${type.toUpperCase()}: ${message}`);
+    }
+}
+</script>
+{% endblock %}

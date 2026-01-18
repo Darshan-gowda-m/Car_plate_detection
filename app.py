@@ -132,7 +132,7 @@ class Config:
     MODEL_PATH = str(current_dir / 'models' / 'yolov11n.pt')
     TRANSFORMER_MODEL_PATH = str(current_dir / 'models' / 'transformer_plate.pt')
     USE_GPU = os.getenv('USE_GPU', 'True').lower() == 'true'
-    GOOGLE_VISION_API_KEY = os.getenv('GOOGLE_VISION_API_KEY', 'AIzaSyDjLbmrmgSDU84-s2VY_YIj5DyUUUA7Vgo')
+    GOOGLE_VISION_API_KEY = os.getenv('GOOGLE_VISION_API_KEY', 'A')
     GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', './credentials/google-vision.json')
     MAX_WORKERS = int(os.getenv('MAX_WORKERS', '4'))
     BATCH_SIZE = int(os.getenv('BATCH_SIZE', '8'))

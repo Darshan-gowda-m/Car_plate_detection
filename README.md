@@ -328,7 +328,7 @@ MIT License
 ## 🚀 Quick Start
 
 ```bash
-git clone <repo>
+git clone https://github.com/Darshan-gowda-m/Car_plate_detection
 cd vehicle-plate-detection
 python setup.py
 python app.py
